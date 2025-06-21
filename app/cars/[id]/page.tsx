@@ -37,24 +37,6 @@ const rentalLocations: { value: LocationValue; label: LocationValue }[] = [
 export default async function CarDetailPage({ params }: { params: Promise<{ id: string }> }) {
   // Await the params
   const { id } = await params
-  
-  // Validate that id is numeric
-  if (!/^\d+$/.test(id)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center p-8 bg-white rounded-lg shadow-md max-w-md w-full">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Invalid Car ID</h2>
-          <p className="text-gray-600 mb-4">Please provide a valid numeric car ID.</p>
-          <a 
-            href="/cars" 
-            className="inline-block mt-4 px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            Back to Cars
-          </a>
-        </div>
-      </div>
-    )
-  }
 
   const host = process.env.NEXT_PUBLIC_VERCEL_URL || process.env.NEXT_PUBLIC_SITE_URL || "localhost:3000"
   const protocol = process.env.NODE_ENV === "production" ? "https" : "http"
