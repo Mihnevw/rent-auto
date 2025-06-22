@@ -1,94 +1,213 @@
 "use client"
 
-import { Phone, ChevronDown } from "lucide-react"
+import { Phone, ChevronDown, Check, Menu, X } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { useState, useEffect } from "react"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import Link from "next/link"
+import { type TranslationKey } from "@/lib/translations"
 
 export function Header() {
   const { language, setLanguage, t } = useLanguage()
+  const [isOpen, setIsOpen] = useState(false)
+  const [prevScrollPos, setPrevScrollPos] = useState(0)
+  const [visible, setVisible] = useState(true)
+  const [scrollDirection, setScrollDirection] = useState("up")
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY
+    let ticking = false
+
+    const updateScrollDirection = () => {
+      const scrollY = window.scrollY
+      const direction = scrollY > lastScrollY ? "down" : "up"
+      
+      if (direction !== scrollDirection && Math.abs(scrollY - lastScrollY) > 10) {
+        setScrollDirection(direction)
+        setVisible(direction === "up")
+      }
+      
+      lastScrollY = scrollY > 0 ? scrollY : 0
+      ticking = false
+    }
+
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateScrollDirection)
+        ticking = true
+      }
+
+      // Always show header at the top of the page
+      if (window.scrollY < 50) {
+        setVisible(true)
+      }
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true })
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [scrollDirection])
+
+  const navigationLinks: Array<{ href: string; label: TranslationKey }> = [
+    { href: "/", label: "home" },
+    { href: "/about", label: "about" },
+    { href: "/cars", label: "cars" },
+    { href: "/prices", label: "prices" },
+    { href: "/monthly-offers", label: "monthlyOffers" },
+    { href: "/services", label: "services" },
+    { href: "/contacts", label: "contacts" },
+  ]
 
   return (
-    <header className="bg-white px-4 py-4 shadow-sm">
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+    <header 
+      className={`bg-white shadow-sm sticky top-0 z-50 transition-transform duration-300 ${
+        visible ? 'translate-y-0' : '-translate-y-full'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-4">
         {/* Logo */}
-        <div className="flex items-center gap-2">
-          <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-            <div className="w-8 h-6 bg-white rounded-sm relative">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-500 rounded-full flex items-center justify-center">
+            <div className="w-6 h-4 sm:w-8 sm:h-6 bg-white rounded-sm relative">
               <div className="absolute inset-1 bg-green-500 rounded-sm"></div>
             </div>
           </div>
           <div>
-            <div className="text-2xl font-bold">
-              <span className="text-green-500">DL</span>
+            <div className="text-xl sm:text-2xl font-bold">
+              <span className="text-green-500">AUTO</span>
               <span className="text-gray-800">RENT</span>
             </div>
             <div className="text-xs text-gray-600">
-              {language === "bg" ? "Коли под наем в България" : "Car rental in Bulgaria"}
+              {t("carRental")}
             </div>
           </div>
-        </div>
+        </Link>
 
-        {/* Navigation */}
-        <nav className="hidden lg:flex items-center gap-6">
-          <a href="/" className="text-gray-800 hover:text-orange-400 font-medium text-base">
-            {t("home")}
-          </a>
-          <a href="/about" className="text-gray-800 hover:text-orange-400 font-medium text-base">
-            {t("about")}
-          </a>
-          <a href="/cars" className="text-gray-800 hover:text-orange-400 font-medium text-base">
-            {t("cars")}
-          </a>
-          <a href="/prices" className="text-gray-800 hover:text-orange-400 font-medium text-base">
-            {t("prices")}
-          </a>
-          <a href="/monthly-offers" className="text-gray-800 hover:text-orange-400 font-medium text-base">
-            {t("monthlyOffers")}
-          </a>
-          <a href="/services" className="text-gray-800 hover:text-orange-400 font-medium text-base">
-            {t("services")}
-          </a>
-          <a href="/terms" className="text-gray-800 hover:text-orange-400 font-medium text-base">
-            {t("terms")}
-          </a>
-          <a href="/contacts" className="text-gray-800 hover:text-orange-400 font-medium text-base">
-            {t("contacts")}
-          </a>
+        {/* Desktop Navigation */}
+        <nav className="hidden lg:flex items-center gap-5">
+          {navigationLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-gray-800 hover:text-orange-400 font-medium text-base transition-colors"
+            >
+              {t(link.label)}
+            </Link>
+          ))}
         </nav>
 
         {/* Right side */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <div className="hidden md:flex items-center gap-2 text-sm">
             <Phone className="w-4 h-4" />
             <span className="font-semibold">+359 898636246</span>
           </div>
 
-          {/* Language Selector */}
-          <div
-            className="flex items-center gap-1 bg-green-100 px-2 py-1 rounded cursor-pointer"
-            onClick={() => setLanguage(language === "bg" ? "en" : "bg")}
-          >
-            <div className="w-4 h-3 bg-white relative">
-              {language === "bg" ? (
-                <>
-                  <div className="absolute top-0 left-0 w-full h-1 bg-white"></div>
-                  <div className="absolute top-1 left-0 w-full h-1 bg-green-500"></div>
-                  <div className="absolute top-2 left-0 w-full h-1 bg-red-500"></div>
-                </>
-              ) : (
-                <>
-                  <div className="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
-                  <div className="absolute top-1 left-0 w-full h-1 bg-white"></div>
-                  <div className="absolute top-2 left-0 w-full h-1 bg-blue-500"></div>
-                </>
-              )}
-            </div>
-            <span className="text-sm font-medium">{language.toUpperCase()}</span>
-            <ChevronDown className="w-3 h-3" />
-          </div>
+          {/* Language Selector Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-1 bg-green-100 px-2 py-1 rounded cursor-pointer hover:bg-green-200 transition-colors">
+              <div className="w-4 h-3 bg-white relative">
+                {language === "bg" ? (
+                  <>
+                    <div className="absolute top-0 left-0 w-full h-1 bg-white"></div>
+                    <div className="absolute top-1 left-0 w-full h-1 bg-green-500"></div>
+                    <div className="absolute top-2 left-0 w-full h-1 bg-red-500"></div>
+                  </>
+                ) : (
+                  <>
+                    <div className="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
+                    <div className="absolute top-1 left-0 w-full h-1 bg-white"></div>
+                    <div className="absolute top-2 left-0 w-full h-1 bg-blue-500"></div>
+                  </>
+                )}
+              </div>
+              <span className="text-sm font-medium">{language.toUpperCase()}</span>
+              <ChevronDown className="w-3 h-3" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => setLanguage("bg")}
+                className="flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-3 relative">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-white"></div>
+                    <div className="absolute top-1 left-0 w-full h-1 bg-green-500"></div>
+                    <div className="absolute top-2 left-0 w-full h-1 bg-red-500"></div>
+                  </div>
+                  <span>Български</span>
+                </div>
+                {language === "bg" && <Check className="w-4 h-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setLanguage("en")}
+                className="flex items-center justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-3 relative">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
+                    <div className="absolute top-1 left-0 w-full h-1 bg-white"></div>
+                    <div className="absolute top-2 left-0 w-full h-1 bg-blue-500"></div>
+                  </div>
+                  <span>English</span>
+                </div>
+                {language === "en" && <Check className="w-4 h-4" />}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           <div className="w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
             <span className="text-xs font-bold">€</span>
           </div>
+
+          {/* Mobile Menu Button */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <button className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <Menu className="w-6 h-6" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px] p-0">
+              <div className="flex flex-col h-full">
+                <div className="p-4 border-b">
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                      <div className="w-6 h-4 bg-white rounded-sm relative">
+                        <div className="absolute inset-1 bg-green-500 rounded-sm"></div>
+                      </div>
+                    </div>
+                    <div className="text-xl font-bold">
+                      <span className="text-green-500">AUTO</span>
+                      <span className="text-gray-800">RENT</span>
+                    </div>
+                  </div>
+                </div>
+                <nav className="flex-1 overflow-y-auto p-4">
+                  {navigationLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="flex items-center py-3 px-4 text-lg font-medium text-gray-800 hover:text-orange-400 hover:bg-orange-50 rounded-lg transition-colors"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {t(link.label)}
+                    </Link>
+                  ))}
+                </nav>
+                <div className="p-4 border-t">
+                  <div className="flex items-center gap-2 justify-center">
+                    <Phone className="w-5 h-5 text-green-500" />
+                    <span className="font-semibold">+359 898636246</span>
+                  </div>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
     </header>
