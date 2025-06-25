@@ -16,7 +16,10 @@ const reservationSchema = new mongoose.Schema({
     code: { type: String, required: true },
     paymentStatus: { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending' },
     paymentIntentId: { type: String },
-    totalAmount: { type: Number, required: true }
+    totalAmount: { type: Number, required: true },
+    additionalServices: {
+        childSeat: { type: Boolean, default: false }
+    }
 });
 
 const Reservation = mongoose.model('Reservation', reservationSchema);

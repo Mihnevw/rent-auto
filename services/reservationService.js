@@ -104,5 +104,6 @@ async function getAllReservations() {
 module.exports = {
     isCarAvailable,
     addReservation,
-    getAllReservations
+    getAllReservations,
+    convertToDateTime
 };

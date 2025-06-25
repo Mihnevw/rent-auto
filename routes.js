@@ -41,6 +41,7 @@ router.put('/cars/:id/location', authenticate, carController.updateCarLocation);
 // Reservation routes
 router.get('/reservations', authenticate, reservationController.getReservations);
 router.get('/reservations/cars/available', reservationController.searchAvailableCars);
+router.get('/reservations/availability/:carId', reservationController.getCarAvailability);
 router.post('/reservations',  reservationController.createReservation);
 router.post('/reservations/confirm-payment', reservationController.confirmPayment);
 

@@ -6,9 +6,9 @@ const mongoose = require('mongoose');
 const routes = require('./routes');
 
 const app = express();
-const PORT = 8800;
+const PORT = process.env.PORT || 8800;
 
-mongoose.connect('mongodb://localhost:27017/rent-a-car', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/rent-a-car', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
@@ -17,10 +17,22 @@ mongoose.connect('mongodb://localhost:27017/rent-a-car', {
     console.error('MongoDB connection error:', err);
 });
 
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? process.env.ALLOWED_ORIGINS.split(',') 
+  : ['http://localhost:3000']; // Default to Next.js development server
+
 app.use(cors({
-    origin: '*',
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        if (allowedOrigins.indexOf(origin) === -1) {
+            return callback(new Error('CORS policy violation'), false);
+        }
+        return callback(null, true);
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: '*',
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
 }));
 app.use('/uploads', express.static('uploads'));
