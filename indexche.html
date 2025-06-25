@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Car Rental Payment</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    #card-element {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    button {
+      background: #5469d4;
+      color: #ffffff;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:disabled {
+      background: #999;
+      cursor: not-allowed;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+    .success {
+      color: green;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Car Rental Reservation</h2>
+
+    <form id="reservation-form">
+      <div class="form-group">
+        <label for="cars">Select Car:</label>
+        <select id="cars" required>
+          <option value="">Loading cars...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="fromDate">From Date:</label>
+        <input type="date" id="fromDate" required>
+      </div>
+
+      <div class="form-group">
+        <label for="fromTime">From Time:</label>
+        <input type="time" id="fromTime" required>
+      </div>
+
+      <div class="form-group">
+        <label for="toDate">To Date:</label>
+        <input type="date" id="toDate" required>
+      </div>
+
+      <div class="form-group">
+        <label for="toTime">To Time:</label>
+        <input type="time" id="toTime" required>
+      </div>
+
+      <div class="form-group">
+        <label for="fromPlace">Pickup Location:</label>
+        <select id="fromPlace" required>
+          <option value="">Loading locations...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="toPlace">Return Location:</label>
+        <select id="toPlace" required>
+          <option value="">Loading locations...</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="customerName">Full Name:</label>
+        <input type="text" id="customerName" required>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" required>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone:</label>
+        <input type="tel" id="phone" required>
+      </div>
+
+      <div class="form-group">
+        <label>Card Details:</label>
+        <div id="card-element"></div>
+      </div>
+
+      <div id="total-amount" class="form-group">
+        Total Amount: Loading...
+      </div>
+
+      <button type="submit" id="submit">Make Reservation and Pay</button>
+      <div id="payment-message"></div>
+    </form>
+
+    <p class="note">Test card: 4242 4242 4242 4242</p>
+  </div>
+
+  <script>
+    const stripe = Stripe('pk_test_51Rd89MB7J2xw9kqWVHVJh9sE8eUJ4huxFMRQdiEYMy63RAevAuxz2bCb8emRUqHThmzvG4d7CxMmBCPIzAE6T8VO00hwetqH9X'); // Replace with your live publishable key
+    const elements = stripe.elements();
+    const card = elements.create('card');
+    card.mount('#card-element');
+
+    const form = document.getElementById('reservation-form');
+    const message = document.getElementById('payment-message');
+    const submitButton = document.getElementById('submit');
+
+    // Load cars and locations when page loads
+    async function loadInitialData() {
+      try {
+        // Load cars
+        const carsResponse = await fetch('http://localhost:8800/cars');
+        const cars = await carsResponse.json();
+        const carsSelect = document.getElementById('cars');
+        carsSelect.innerHTML = cars.map(car => 
+          `<option value="${car._id}">${car.make} ${car.model} (${car.year})</option>`
+        ).join('');
+
+        // Load locations
+        const locationsResponse = await fetch('http://localhost:8800/locations');
+        const locations = await locationsResponse.json();
+        const locationOptions = locations.map(location => 
+          `<option value="${location._id}">${location.name}</option>`
+        ).join('');
+        
+        document.getElementById('fromPlace').innerHTML = locationOptions;
+        document.getElementById('toPlace').innerHTML = locationOptions;
+      } catch (error) {
+        console.error('Error loading initial data:', error);
+        message.textContent = 'Error loading cars and locations. Please refresh the page.';
+        message.className = 'error';
+      }
+    }
+
+    loadInitialData();
+
+    // Handle form submission
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      submitButton.disabled = true;
+      message.textContent = 'Processing...';
+
+      try {
+        // Step 1: Create reservation
+        const reservationData = {
+          carId: document.getElementById('cars').value,
+          fromDate: document.getElementById('fromDate').value,
+          toDate: document.getElementById('toDate').value,
+          fromTime: document.getElementById('fromTime').value,
+          toTime: document.getElementById('toTime').value,
+          fromPlace: document.getElementById('fromPlace').value,
+          toPlace: document.getElementById('toPlace').value,
+          customerName: document.getElementById('customerName').value,
+          email: document.getElementById('email').value,
+          phone: document.getElementById('phone').value
+        };
+
+        const reservationResponse = await fetch('http://localhost:8800/reservations', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token') // Make sure to set this after login
+          },
+          body: JSON.stringify(reservationData)
+        });
+
+        if (!reservationResponse.ok) {
+          throw new Error('Failed to create reservation');
+        }
+
+        const { reservation, paymentIntent } = await reservationResponse.json();
+
+        // Step 2: Confirm card payment
+        const result = await stripe.confirmCardPayment(paymentIntent.clientSecret, {
+          payment_method: {
+            card: card,
+            billing_details: {
+              name: document.getElementById('customerName').value,
+              email: document.getElementById('email').value
+            }
+          }
+        });
+
+        if (result.error) {
+          throw new Error(result.error.message);
+        }
+
+        // Step 3: Confirm payment on server
+        const confirmResponse = await fetch('http://localhost:8800/reservations/confirm-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          },
+          body: JSON.stringify({
+            paymentIntentId: result.paymentIntent.id,
+            reservationId: reservation._id
+          })
+        });
+
+        if (!confirmResponse.ok) {
+          throw new Error('Failed to confirm payment on server');
+        }
+
+        message.textContent = 'Reservation completed successfully! Check your email for details.';
+        message.className = 'success';
+        form.reset();
+      } catch (error) {
+        message.textContent = error.message;
+        message.className = 'error';
+      } finally {
+        submitButton.disabled = false;
+      }
+    });
+
+    // Update total amount when dates change
+    async function updateTotalAmount() {
+      const carId = document.getElementById('cars').value;
+      const fromDate = document.getElementById('fromDate').value;
+      const toDate = document.getElementById('toDate').value;
+
+      if (carId && fromDate && toDate) {
+        try {
+          const response = await fetch(`http://localhost:8800/cars/${carId}`);
+          const car = await response.json();
+          const start = new Date(fromDate);
+          const end = new Date(toDate);
+          const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+          
+          let pricePerDay;
+          if (days <= 3) pricePerDay = car.pricing['1_3'];
+          else if (days <= 7) pricePerDay = car.pricing['4_7'];
+          else if (days <= 14) pricePerDay = car.pricing['8_14'];
+          else pricePerDay = car.pricing['15_plus'];
+
+          const totalAmount = days * pricePerDay;
+          document.getElementById('total-amount').textContent = `Total Amount: ${totalAmount} BGN`;
+        } catch (error) {
+          console.error('Error calculating total:', error);
+        }
+      }
+    }
+
+    document.getElementById('cars').addEventListener('change', updateTotalAmount);
+    document.getElementById('fromDate').addEventListener('change', updateTotalAmount);
+    document.getElementById('toDate').addEventListener('change', updateTotalAmount);
+  </script>
+</body>
+</html>
