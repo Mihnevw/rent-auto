@@ -6,13 +6,22 @@ import { headers } from "next/headers"
 export const dynamic = 'force-dynamic'
 export const dynamicParams = true
 
-type LocationValue = "burgas" | "pomorie" | "nessebar" | "sunnyBeach" | "svetiVlas" | "varna" | "goldenSands" | "plovdiv"
+interface Location {
+  _id: string
+  name: string
+  address: string
+  city: string
+  isActive: boolean
+}
 
 interface CarDetails {
-  id: string
+  _id: string
+  make: string
+  model: string
   name: string
   mainImage: string
   thumbnails: string[]
+  engine: string
   fuel: string
   transmission: string
   seats: string
@@ -22,30 +31,21 @@ interface CarDetails {
   bodyType: string
   priceIncludes: string[]
   features: string[]
+  pricing: {
+    "1_3": number
+    "4_7": number
+    "8_14": number
+    "15_plus": number
+  }
+  currentLocation: Location
 }
-
-const rentalLocations: { value: LocationValue; label: LocationValue }[] = [
-  { value: "burgas", label: "burgas" },
-  { value: "pomorie", label: "pomorie" },
-  { value: "nessebar", label: "nessebar" },
-  { value: "sunnyBeach", label: "sunnyBeach" },
-  { value: "svetiVlas", label: "svetiVlas" },
-  { value: "varna", label: "varna" },
-  { value: "goldenSands", label: "goldenSands" },
-]
 
 export default async function CarDetailPage({ params }: { params: Promise<{ id: string }> }) {
   // Await the params
   const { id } = await params
 
-  const host = process.env.NEXT_PUBLIC_VERCEL_URL || process.env.NEXT_PUBLIC_SITE_URL || "localhost:3000"
-  const protocol = process.env.NODE_ENV === "production" ? "https" : "http"
-  const apiUrl = `${protocol}://${host}/api/cars/${id}`
-  
-  console.log('Fetching car details from:', apiUrl)
-  
   try {
-    const response = await fetch(apiUrl, { 
+    const response = await fetch(`http://localhost:8800/cars/${id}`, { 
       headers: {
         "Content-Type": "application/json",
       },
@@ -55,24 +55,11 @@ export default async function CarDetailPage({ params }: { params: Promise<{ id: 
     console.log('Response status:', response.status)
     
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Error response:', {
-        status: response.status,
-        statusText: response.statusText,
-        body: errorText
-      })
-      throw new Error(`Failed to fetch car: ${response.statusText}. ${errorText}`)
+      throw new Error(`Failed to fetch car: ${response.statusText}`)
     }
 
-    const data = await response.json()
-    console.log('Response data:', data)
-
-    if (!data.car) {
-      console.error('No car data in response')
-      throw new Error('Car data not found in response')
-    }
-
-    const { car } = data as { car: CarDetails }
+    const car = await response.json()
+    console.log('Response data:', car)
 
     return <CarDetailClient car={car} />
   } catch (error) {

@@ -183,8 +183,8 @@ export default function TermsPage() {
                   : "This document represents the complete terms and conditions for car rental from DL RENT EOOD."}
                 <br />
                 {language === "bg"
-                  ? "За въпроси и разяснения: +359 898 636 246 | info@dlrent.bg"
-                  : "For questions and clarifications: +359 898 636 246 | info@dlrent.bg"}
+                  ? "За въпроси и разяснения: +359 894 818 283 | info@dlrent.bg"
+                  : "For questions and clarifications: +359 894 818 283 | info@dlrent.bg"}
               </p>
             </div>
           </div>

@@ -1,0 +1,24 @@
+<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="32" height="32" fill="#f1f5f9" rx="4"/>
+  
+  <!-- Car Icon -->
+  <g transform="translate(16, 11)">
+    <path d="M-8,-2 L-6,-4 L6,-4 L8,-2 L8,3 L6,4 L-6,4 L-8,3 Z" 
+          fill="#3b82f6"/>
+    <circle cx="-5" cy="4" r="2" fill="#374151"/>
+    <circle cx="5" cy="4" r="2" fill="#374151"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="16" y="22" text-anchor="middle" 
+        font-family="Arial" 
+        font-size="6" 
+        font-weight="bold" 
+        fill="#16a34a">AUTO</text>
+  <text x="16" y="29" text-anchor="middle" 
+        font-family="Arial" 
+        font-size="6" 
+        font-weight="bold" 
+        fill="#000">RENT</text>
+</svg>

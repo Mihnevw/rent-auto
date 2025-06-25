@@ -3,137 +3,253 @@
 import Image from "next/image"
 import { Header } from "@/components/header"
 import { useLanguage } from "@/lib/language-context"
-import { Heart, CheckCircle } from "lucide-react"
+import type { TranslationKey } from "@/lib/language-context"
+import { Heart, CheckCircle, MapPin, Award, Shield, Car, Clock, Users } from "lucide-react"
+import { FooterSection } from "@/components/sections/footer-section"
+import Head from "next/head"
 
 export default function AboutPage() {
-  const { language } = useLanguage()
+  const { t } = useLanguage()
 
-  const aboutContent = {
-    bg: {
-      title: "Кои сме ние ?",
-      registrationInfo: "DLrent е фирма регистрирана в търговския регистър като:",
-      companyName: "ДЛ РЕНТ ЕООД",
-      eik: "ЕИК 208110013",
-      address: 'Адрес: гр. Стара Загора, бул. "Цар Симеон Велики" 83,',
-      mainDescription:
-        "DL Rent е водеща компания за автомобили под наем, предлагаща надеждни, удобни и прозрачни услуги за клиенти в България. Нашата основна мисия е да осигурим комфортно, сигурно и безпроблемно пътуване с качествени автомобили, без скрити такси и с включено пълно автокаско.",
-      officesTitle: "Нашите офиси:",
-      offices: [
-        {
-          icon: <Heart className="w-4 h-4 text-pink-500" />,
-          text: "Летище Пловдив — офис, удобно разположен за всички пристигащи пътници.",
-        },
-        {
-          icon: <CheckCircle className="w-4 h-4 text-green-500" />,
-          text: `Град Пловдив, бул. „Куклянско шосе" 20 — за тези, които търсят удобен и бърз начин да наемат автомобил в рамките на града.`,
-        },
-        {
-          icon: <CheckCircle className="w-4 h-4 text-green-500" />,
-          text: `Град Стара Загора, бул "Цар Симеон Велики" 83 — за клиенти от региона, които се нуждаят от качествен автомобил под наем.`,
-        },
-      ],
-      deliveryInfo: `В останалите градове автомобилите се доставят до адрес, директно до дома Ви или до летището. Тази екстра Ви спестява ходене до офиса с такси или градски транспорт, за да получите автомобила, който искате да наемете.`,
-      fleetInfo:
-        "Компанията развива своята дейност с отдаване на автомобили под наем от началото на 2022г. Предлагаме нови коли от висок клас предимно на марките Volkswagen и Hyundai. Цели ни е да осигурим максимален комфорт при избирането, ситуирност на пътя, приятна атмосфера при дълги пътувания и всякакъв вид автомобилно удобство с множеството екстри, с които са снабдени автомобилите ни. Всички автомобили се обслужват само в оторизиран сервиз на Volkswagen, с което гарантираме безупречното техническо състояние на всички наши автомобили.",
-      finalNote:
-        "За кратките ни опит в бранша можем да бъдем горди с това, че нямаме разочарован или недоволен клиент от нашите услуги. Отличаваме се да удовлетворим всички изисквания и желания на нашите клиенти, и мислим, че успяваме.",
-    },
-    en: {
-      title: "Who are we?",
-      registrationInfo: "DLrent is a company registered in the commercial register as:",
-      companyName: "DL RENT EOOD",
-      eik: "UIC 208110013",
-      address: 'Address: Stara Zagora, "Tsar Simeon Veliki" Blvd. 83,',
-      mainDescription:
-        "DL Rent is a leading car rental company, offering reliable, convenient and transparent services for clients in Bulgaria. Our main mission is to provide comfortable, safe and hassle-free travel with quality vehicles, without hidden fees and with full comprehensive insurance included.",
-      officesTitle: "Our offices:",
-      offices: [
-        {
-          icon: <Heart className="w-4 h-4 text-pink-500" />,
-          text: "Plovdiv Airport — office, conveniently located for all arriving passengers.",
-        },
-        {
-          icon: <CheckCircle className="w-4 h-4 text-green-500" />,
-          text: 'Plovdiv city, "Kuklyansko Shose" Blvd. 20 — for those looking for a convenient and fast way to rent a car within the city.',
-        },
-        {
-          icon: <CheckCircle className="w-4 h-4 text-green-500" />,
-          text: 'Stara Zagora city, "Tsar Simeon Veliki" Blvd. 83 — for clients from the region who need a quality rental car.',
-        },
-      ],
-      deliveryInfo:
-        "In other cities, cars are delivered to your address, directly to your home or to the airport. This extra service saves you from going to the office by taxi or public transport to get the car you want to rent.",
-      fleetInfo:
-        "The company has been developing its car rental business since the beginning of 2022. We offer new high-class cars mainly of Volkswagen and Hyundai brands. Our goal is to provide maximum comfort in choosing, road safety, pleasant atmosphere during long trips and all kinds of automotive convenience with the many extras our cars are equipped with. All cars are serviced only at authorized Volkswagen service centers, which guarantees the impeccable technical condition of all our vehicles.",
-      finalNote:
-        "For our short experience in the industry, we can be proud that we have no disappointed or dissatisfied clients with our services. We excel at satisfying all requirements and wishes of our clients, and we think we succeed.",
-    },
+  // Structured data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "AUTO RENT EOOD",
+      "description": t("aboutPageDescription"),
+      "foundingDate": "2023",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Tsar Simeon Veliki Blvd. 83",
+        "addressLocality": "Stara Zagora",
+        "addressCountry": "Bulgaria"
+      },
+      "areaServed": [
+        "Sunny Beach",
+        "Burgas",
+        "Nessebar",
+        "Varna",
+        "Pomorie",
+        "St. Vlas",
+        "Golden Sands"
+      ]
+    }
   }
 
-  const content = aboutContent[language]
+  const locations: Array<{ icon: React.ReactElement; key: TranslationKey }> = [
+    {
+      icon: <Heart className="w-5 h-5 text-pink-500" />,
+      key: "sunnyBeach"
+    },
+    {
+      icon: <CheckCircle className="w-5 h-5 text-emerald-500" />,
+      key: "burgas"
+    },
+    {
+      icon: <CheckCircle className="w-5 h-5 text-emerald-500" />,
+      key: "nessebar"
+    },
+    {
+      icon: <CheckCircle className="w-5 h-5 text-emerald-500" />,
+      key: "varna"
+    },
+    {
+      icon: <CheckCircle className="w-5 h-5 text-emerald-500" />,
+      key: "pomorie"
+    },
+    {
+      icon: <CheckCircle className="w-5 h-5 text-emerald-500" />,
+      key: "svetiVlas"
+    },
+    {
+      icon: <CheckCircle className="w-5 h-5 text-emerald-500" />,
+      key: "goldenSands"
+    }
+  ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <>
+      <Head>
+        <title>{t("aboutPageTitle")}</title>
+        <meta name="description" content={t("aboutPageDescription")} />
+        <meta name="keywords" content="auto rent bulgaria, car rental company, rent a car bulgaria, car hire stara zagora, premium car rental" />
+        <meta property="og:title" content={t("aboutPageOgTitle")} />
+        <meta property="og:description" content={t("aboutPageOgDescription")} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="/images/dlrent-office.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <link rel="canonical" href="https://autorent.bg/about" />
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
+      </Head>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
-          {/* Left Column - Text Content */}
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-gray-800 mb-8">{content.title}</h1>
-
-            {/* Registration Information */}
-            <div className="space-y-2">
-              <p className="text-gray-700">{content.registrationInfo}</p>
-              <p className="font-bold text-gray-800">{content.companyName}</p>
-              <p className="font-bold text-gray-800">{content.eik}</p>
-              <p className="text-gray-700">{content.address}</p>
-            </div>
-
-            {/* Main Description */}
-            <p className="text-gray-700 leading-relaxed">{content.mainDescription}</p>
-
-            {/* Offices Section */}
-            <div>
-              <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <Heart className="w-4 h-4 text-pink-500" />
-                {content.officesTitle}
-              </h3>
-              <div className="space-y-3">
-                {content.offices.map((office, index) => (
-                  <div key={index} className="flex items-start gap-3">
-                    {office.icon}
-                    <p className="text-gray-700 text-sm leading-relaxed">{office.text}</p>
-                  </div>
-                ))}
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <Header />
+        <main>
+          {/* Hero Section */}
+          <section className="relative overflow-hidden bg-gradient-to-r from-blue-500 to-green-500 text-white" aria-label="Company Introduction">
+            <div className="absolute inset-0 bg-black/20"></div>
+            <div className="relative max-w-7xl mx-auto px-4 py-16 lg:py-24">
+              <div className="text-center max-w-4xl mx-auto">
+                <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
+                  {t("aboutTitle")}
+                </h1>
+                <p className="text-xl lg:text-2xl text-blue-100 leading-relaxed">
+                  {t("aboutMainDescription")}
+                </p>
               </div>
             </div>
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+          </section>
 
-            {/* Delivery Information */}
-            <p className="text-gray-700 leading-relaxed">{content.deliveryInfo}</p>
+          {/* Main Content */}
+          <section className="max-w-7xl mx-auto px-4 py-16" aria-label="Company Details">
+            <div className="grid lg:grid-cols-3 gap-8">
+              {/* Left Column - Company Info */}
+              <div className="lg:col-span-2 space-y-8">
 
-            {/* Fleet Information */}
-            <p className="text-gray-700 leading-relaxed">{content.fleetInfo}</p>
+                {/* Registration Card */}
+                <article className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 hover:shadow-2xl transition-all duration-300">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="p-3 bg-blue-100 rounded-full">
+                      <Shield className="w-6 h-6 text-blue-600" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-slate-800 mb-4">{t("officialRegistration")}</h2>
+                      <div className="space-y-2 text-slate-600">
+                        <p>{t("registrationInfo")}</p>
+                        <p className="font-bold text-slate-800 text-lg">{t("companyName")}</p>
+                        <address className="flex items-center gap-2 not-italic">
+                          <MapPin className="w-4 h-4 text-red-500" />
+                          {t("companyAddress")}
+                        </address>
+                      </div>
+                    </div>
+                  </div>
+                </article>
 
-            {/* Final Note */}
-            <p className="text-gray-700 leading-relaxed">{content.finalNote}</p>
-          </div>
+                {/* Locations Card */}
+                <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 hover:shadow-2xl transition-all duration-300">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 bg-pink-100 rounded-full">
+                      <MapPin className="w-6 h-6 text-pink-600" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-800">{t("ourLocations")}</h3>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {locations.map((location, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-3 p-4 rounded-xl bg-gradient-to-r from-slate-50 to-slate-100 hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 group"
+                      >
+                        <div className="group-hover:scale-110 transition-transform duration-200">
+                          {location.icon}
+                        </div>
+                        <p className="text-slate-700 font-medium">{t(location.key)}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
-          {/* Right Column - Office Image */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8">
-              <Image
-                src="/images/dlrent-office.png"
-                alt="DL RENT Office in Stara Zagora"
-                width={600}
-                height={800}
-                className="w-full h-auto rounded-lg shadow-lg"
-                priority
-              />
+                {/* Delivery Service Card */}
+                <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl shadow-xl text-white p-8 hover:shadow-2xl transition-all duration-300">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 bg-white/20 backdrop-blur-sm rounded-full">
+                      <Car className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold mb-4">{t("deliveryToAddress")}</h3>
+                      <p className="text-emerald-50 leading-relaxed text-lg">
+                        {t("deliveryDescription")}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Fleet Information Card */}
+                <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8 hover:shadow-2xl transition-all duration-300">
+                  <div className="flex items-start gap-4 mb-6">
+                    <div className="p-3 bg-indigo-100 rounded-full">
+                      <Award className="w-6 h-6 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-slate-800 mb-4">{t("ourFleet")}</h3>
+                      <p className="text-slate-600 leading-relaxed text-lg mb-6">
+                        {t("fleetDescription")}
+                      </p>
+                      <div className="p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                        <p className="text-slate-700 leading-relaxed font-medium">
+                          {t("finalNote")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column - Image and Stats */}
+              <div className="lg:col-span-1 space-y-8">
+                {/* Office Image */}
+                <div className="sticky top-8">
+                  {/* <div className="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow duration-300">
+                    <Image
+                      src="/images/dlrent-office.png"
+                      alt="AUTO RENT Office"
+                      width={600}
+                      height={800}
+                      className="w-full h-80 lg:h-96 object-cover"
+                      priority
+                    />
+                    <div className="p-6">
+                      <h4 className="text-xl font-bold text-slate-800 mb-2">{t("ourOffice")}</h4>
+                      <p className="text-slate-600">{t("sunnyBeachBulgaria")}</p>
+                    </div>
+                  </div> */}
+
+                  {/* Stats Cards */}
+                  <div className="grid grid-cols-2 gap-4 mt-8">
+                    <div className="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow duration-300">
+                      <div className="p-3 bg-blue-100 rounded-full w-fit mx-auto mb-3">
+                        <Clock className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <p className="text-2xl font-bold text-slate-800">2023</p>
+                      <p className="text-sm text-slate-600">{t("experienceSince2023")}</p>
+                    </div>
+
+                    <div className="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow duration-300">
+                      <div className="p-3 bg-green-100 rounded-full w-fit mx-auto mb-3">
+                        <Users className="w-6 h-6 text-green-600" />
+                      </div>
+                      <p className="text-2xl font-bold text-slate-800">100%</p>
+                      <p className="text-sm text-slate-600">{t("satisfiedClients")}</p>
+                    </div>
+
+                    <div className="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow duration-300">
+                      <div className="p-3 bg-purple-100 rounded-full w-fit mx-auto mb-3">
+                        <Car className="w-6 h-6 text-purple-600" />
+                      </div>
+                      <p className="text-2xl font-bold text-slate-800">NEW</p>
+                      <p className="text-sm text-slate-600">{t("newVehicles")}</p>
+                    </div>
+
+                    <div className="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow duration-300">
+                      <div className="p-3 bg-orange-100 rounded-full w-fit mx-auto mb-3">
+                        <Award className="w-6 h-6 text-orange-600" />
+                      </div>
+                      <p className="text-2xl font-bold text-slate-800">PRO</p>
+                      <p className="text-sm text-slate-600">{t("professionalService")}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </section>
+        </main>
+        <FooterSection />
       </div>
-    </div>
+    </>
   )
 }

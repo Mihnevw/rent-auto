@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Header } from "@/components/header"
@@ -8,12 +8,152 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar as CalendarIcon, Clock, Fuel, Users, Car, Settings } from "lucide-react"
+import { Calendar as CalendarIcon, Clock, Fuel, Users, Car, Settings, Gauge } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format, isBefore, startOfToday } from "date-fns"
 import { cn } from "@/lib/utils"
+import { FooterSection } from "@/components/sections/footer-section"
+
+interface Location {
+  _id: string
+  name: string
+  address: string
+  city: string
+  isActive: boolean
+}
+
+interface TimeInputProps {
+  value: string
+  onChange: (value: string) => void
+  label: string
+}
+
+function TimeInput({ value, onChange, label }: TimeInputProps) {
+  // Split time into hours and minutes, handle empty value
+  const [hours, minutes] = value 
+    ? value.split(":").map(num => num === "00" ? "" : String(parseInt(num, 10)))
+    : ["", ""]
+
+  const handleHourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value
+    if (newValue === "") {
+      // If hours are cleared and no minutes, clear the whole value
+      if (!minutes) {
+        onChange("")
+        return
+      }
+      // If minutes exist, keep them with 00 hours
+      onChange(`00:${minutes.padStart(2, '0')}`)
+      return
+    }
+
+    const newHour = parseInt(newValue)
+    if (!isNaN(newHour) && newHour >= 0 && newHour <= 23) {
+      onChange(`${newHour.toString().padStart(2, '0')}:${(minutes || "0").padStart(2, '0')}`)
+    }
+  }
+
+  const handleMinuteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value
+    if (newValue === "") {
+      // If minutes are cleared and no hours, clear the whole value
+      if (!hours) {
+        onChange("")
+        return
+      }
+      // If hours exist, keep them with 00 minutes
+      onChange(`${hours.padStart(2, '0')}:00`)
+      return
+    }
+
+    const newMinute = parseInt(newValue)
+    if (!isNaN(newMinute) && newMinute >= 0 && newMinute <= 59) {
+      onChange(`${(hours || "0").padStart(2, '0')}:${newMinute.toString().padStart(2, '0')}`)
+    }
+  }
+
+  return (
+    <div>
+      <Label className="text-sm text-gray-600 mb-2 block">{label}</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <div className="relative">
+            <Input
+              type="text"
+              value={value || "--:--"}
+              readOnly
+              className="w-full h-12 rounded-lg border-gray-200 cursor-pointer bg-white pl-4 pr-10"
+            />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <Clock className="h-5 w-5 text-gray-500" />
+            </div>
+          </div>
+        </PopoverTrigger>
+        <PopoverContent className="w-[280px] p-4" align="start">
+          <div className="flex flex-col gap-4">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 justify-center">
+                <Input
+                  type="number"
+                  min={0}
+                  max={23}
+                  value={hours}
+                  onChange={handleHourChange}
+                  className="w-24 text-center h-12 text-lg font-medium"
+                  placeholder="--"
+                />
+                <span className="text-xl font-medium text-gray-500">:</span>
+                <Input
+                  type="number"
+                  min={0}
+                  max={59}
+                  value={minutes}
+                  onChange={handleMinuteChange}
+                  className="w-24 text-center h-12 text-lg font-medium"
+                  placeholder="--"
+                />
+              </div>
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  )
+}
+
+interface CarType {
+  _id: string
+  make: string
+  model: string
+  name: string
+  mainImage: string
+  thumbnails: string[]
+  engine: string
+  fuel: string
+  transmission: string
+  seats: string
+  doors: string
+  year: string
+  consumption: string
+  bodyType: string
+  priceIncludes: string[]
+  features: string[]
+  pricing: {
+    "1_3": number
+    "4_7": number
+    "8_14": number
+    "15_plus": number
+  }
+  currentLocation: {
+    _id: string
+    name: string
+    address: string
+    city: string
+    isActive: boolean
+  }
+}
 
 const rentalLocations = [
   { value: "burgas", labelKey: "burgas" },
@@ -25,275 +165,18 @@ const rentalLocations = [
   { value: "golden-sands", labelKey: "goldenSands" },
 ]
 
-const cars = [
-  {
-    id: 1,
-    name: "SHKODA RAPID 2016",
-    slug: "vw-up-move",
-    image: "/images/rapid.png?height=200&width=300",
-    price: "40.00",
-    fuel: "Бензин",
-    fuelType: "gasoline", // for filtering
-    transmission: "Ръчни скорости",
-    transmissionType: "manual", // for filtering
-    seats: "5 места",
-    doors: "4/5 врати",
-        category: "Икономични",
-      bodyType: "hatchback", // for filtering
-      badges: ["ИКОНОМИЧНИ"],
-  },
-  {
-    id: 2,
-    name: "MERCEDES-BENZ GLC 2021",
-    slug: "hyundai-i10-meta-blue",
-    image: "/images/glc.png?height=200&width=300",
-    price: "50.00",
-    fuel: "Бензин",
-    fuelType: "gasoline",
-    transmission: "Автоматик",
-    transmissionType: "automatic",
-    seats: "4/5 врати",
-    doors: "4/5 врати",
-        category: "Икономика",
-      bodyType: "hatchback",
-      badges: ["2024", "ИКОНОМИЧНИ"],
-  },
-  {
-    id: 3,
-    name: "BMW 3-SERIES 2021",
-    slug: "hyundai-i10",
-    image: "/images/bmw-3.png?height=200&width=300",
-    price: "70.00",
-    fuel: "Бензин",
-    fuelType: "gasoline",
-    transmission: "Автоматик",
-    transmissionType: "automatic",
-    seats: "4/5 врати",
-    doors: "4/5 врати",
-        category: "Икономикачни",
-      bodyType: "hatchback",
-      badges: ["ИКОНОМИЧНИ"],
-  },
-  {
-    id: 4,
-    name: "BMW 5-SERIES 2020",
-    slug: "vw-taigo-tsi-dsg",
-    image: "/images/bmw-5.png?height=200&width=300",
-    price: "85.00",
-    fuel: "Бензин",
-    fuelType: "gasoline",
-    transmission: "Автоматик",
-    transmissionType: "automatic",
-    seats: "5 места",
-    doors: "4/5 врати",
-    category: "Компактни",
-    bodyType: "suv",
-    badges: ["2022", "КОМПАКТНИ"],
-  },
-  {
-    id: 5,
-    name: "MASERATI GHIBLI 2017",
-    slug: "vw-passat-tdi",
-    image: "/images/maserati.png?height=200&width=300",
-    price: "95.00",
-    fuel: "Дизел",
-    fuelType: "diesel",
-    transmission: "Автоматик",
-    transmissionType: "automatic",
-    seats: "5 места",
-    doors: "4/5 врати",
-    category: "Седан",
-    bodyType: "sedan",
-    badges: ["2023", "СЕДАН"],
-  },
-  {
-    id: 6,
-    name: "JAGUAR F-TYPE 2019",
-    slug: "bmw-320d",
-    image: "/images/jaguar-f.png?height=200&width=300",
-    price: "120.00",
-    fuel: "Дизел",
-    fuelType: "diesel",
-    transmission: "Ръчни скорости",
-    transmissionType: "manual",
-    seats: "5 места",
-    doors: "4/5 врати",
-    category: "Седан",
-    bodyType: "sedan",
-    badges: ["2022", "СЕДАН"],
-  },
-  {
-    id: 7,
-    name: "SHKODA OCTAVIA 2020",
-    slug: "vw-passat-tdi",
-    image: "/images/shkoda.png?height=200&width=300",
-    price: "100.00",
-    fuel: "Бензин",
-    fuelType: "gasoline",
-    transmission: "Автоматик",
-    transmissionType: "automatic",
-    seats: "5 места",
-    doors: "4/5 врати",
-    category: "Седан",
-    bodyType: "sedan",
-    badges: ["2022", "СЕДАН"],
-  },
-  {
-    id: 8,
-    name: "MERCEDES C220 2021",
-    slug: "vw-passat-tdi",
-    image: "/images/mercedes.png?height=200&width=300",
-    price: "100.00",
-    fuel: "Бензин",
-    fuelType: "gasoline",
-    transmission: "Автоматик",
-    transmissionType: "automatic",
-    seats: "5 места",
-    doors: "4/5 врати",
-    category: "Седан",
-    bodyType: "sedan",
-    badges: ["2022", "СЕДАН"],
-  },
-  {
-    id: 9,
-    name: "FORD FOCUS 2021",  
-    slug: "vw-passat-tdi",
-    image: "/images/ford-focus.png?height=200&width=300",
-    price: "100.00",
-    fuel: "Бензин",
-    fuelType: "gasoline",
-    transmission: "Автоматик",
-    transmissionType: "automatic",
-    seats: "5 места",
-    doors: "4/5 врати",
-    category: "Седан",
-    bodyType: "sedan",
-    badges: ["2022", "СЕДАН"],
-  },
-  {
-    id: 10,
-    name: "CITROEN GRAND C4 PICASSO 2016",
-    slug: "vw-passat-tdi",
-    image: "/images/citroen.png?height=200&width=300",
-    price: "100.00",
-    fuel: "Бензин",
-    fuelType: "gasoline",
-    transmission: "Автоматик",
-    transmissionType: "automatic",
-    seats: "5 места",
-    doors: "4/5 врати",
-    category: "Седан",
-    bodyType: "sedan",
-    badges: ["2022", "СЕДАН"],
-  },
-  {
-    id: 11,
-    name: "FORD MONDEO 2021",
-    slug: "vw-passat-tdi",
-    image: "/images/ford-mondeo.png?height=200&width=300",
-    price: "100.00",
-    fuel: "Бензин",
-    fuelType: "gasoline",
-    transmission: "Автоматик",
-    transmissionType: "automatic",
-    seats: "5 места",
-    doors: "4/5 врати",
-    category: "Седан",
-    bodyType: "sedan",
-    badges: ["2022", "СЕДАН"],
-  },
-  {
-    id: 12,
-    name: "VOLKSWAGEN PASSAT 2021", 
-    slug: "vw-passat-tdi",
-    image: "/images/passat.png?height=200&width=300",
-    price: "100.00",
-    fuel: "Бензин",
-    fuelType: "gasoline",
-    transmission: "Автоматик",
-    transmissionType: "automatic",
-    seats: "5 места",
-    doors: "4/5 врати",
-    category: "Седан",
-    bodyType: "sedan",
-    badges: ["2022", "СЕДАН"],
-  },
-
-  {
-    id: 13,
-    name: "CITROEN GRAND C4 PICASSO 2016", 
-    slug: "vw-passat-tdi",
-    image: "/images/citroen.png?height=200&width=300",
-    price: "100.00",
-    fuel: "Бензин",
-    fuelType: "gasoline",
-    transmission: "Автоматик",
-    transmissionType: "automatic",
-    seats: "5 места",
-    doors: "4/5 врати",
-    category: "Седан",
-    bodyType: "sedan",
-    badges: ["2022", "СЕДАН"],
-  },
-
-  {
-    id: 14,
-    name: "SHKODA OCTAVIA 2012", 
-    slug: "vw-passat-tdi",
-    image: "/images/shkoda-octavia.png?height=200&width=300",
-    price: "100.00",
-    fuel: "Бензин",
-    fuelType: "gasoline",
-    transmission: "Автоматик",
-    transmissionType: "automatic",
-    seats: "5 места",
-    doors: "4/5 врати",
-    category: "Седан",
-    bodyType: "sedan",
-    badges: ["2022", "СЕДАН"],
-  },
-
-  {
-    id: 15,
-    name: "MERCEDES-BENZ E-CLASS 2020",
-    slug: "vw-passat-tdi",
-    image: "/images/mercedes-e.png?height=200&width=300",
-    price: "100.00",
-    fuel: "Бензин",
-    fuelType: "gasoline",
-    transmission: "Автоматик",
-    transmissionType: "automatic",
-    seats: "5 места",
-    doors: "4/5 врати",
-    category: "Седан",
-    bodyType: "sedan",
-    badges: ["2022", "СЕДАН"],
-  },
-  
-  {
-    id: 16,
-    name: "SHKODA SUPERB 2021",
-    slug: "vw-passat-tdi",
-    image: "/images/superb.png?height=200&width=300",
-    price: "100.00",
-    fuel: "Бензин",
-    fuelType: "gasoline", 
-    transmission: "Автоматик",
-    transmissionType: "automatic",
-    seats: "5 места",
-    doors: "4/5 врати",
-    category: "Седан",
-    bodyType: "sedan",
-    badges: ["2022", "СЕДАН"],
-  }
-]
-
 export default function CarsPage() {
   const [pickupLocation, setPickupLocation] = useState("")
   const [returnLocation, setReturnLocation] = useState("")
   const [bodyType, setBodyType] = useState("all")
-  const [pickupDate, setPickupDate] = useState<Date>()
-  const [returnDate, setReturnDate] = useState<Date>()
+  const [pickupDate, setPickupDate] = useState<Date | undefined>()
+  const [returnDate, setReturnDate] = useState<Date | undefined>()
+  const [pickupTime, setPickupTime] = useState("10:00")
+  const [returnTime, setReturnTime] = useState("10:00")
+  const [cars, setCars] = useState<CarType[]>([])
+  const [locations, setLocations] = useState<Location[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   // Add filter states
   const [filters, setFilters] = useState({
@@ -305,13 +188,79 @@ export default function CarsPage() {
 
   const { t, formatPrice } = useLanguage()
 
+  const fetchAvailableCars = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      if (!pickupLocation || !returnLocation || !pickupDate || !returnDate) {
+        // If no search criteria, fetch all cars
+        const response = await fetch('http://localhost:8800/cars')
+        if (!response.ok) throw new Error('Failed to fetch cars')
+        const data = await response.json()
+        setCars(data)
+        return
+      }
+
+      // Format dates to ISO 8601
+      const pickupDateTime = new Date(
+        pickupDate.getFullYear(),
+        pickupDate.getMonth(),
+        pickupDate.getDate(),
+        ...pickupTime.split(":").map(Number)
+      ).toISOString()
+
+      const returnDateTime = new Date(
+        returnDate.getFullYear(),
+        returnDate.getMonth(),
+        returnDate.getDate(),
+        ...returnTime.split(":").map(Number)
+      ).toISOString()
+
+      const queryParams = new URLSearchParams({
+        pickupTime: pickupDateTime,
+        returnTime: returnDateTime,
+        pickupLocation,
+        returnLocation
+      })
+
+      const response = await fetch(`http://localhost:8800/reservations/cars/available?${queryParams.toString()}`)
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to fetch available cars')
+      }
+      
+      const data = await response.json()
+      setCars(data.cars)
+    } catch (err) {
+      console.error('Error fetching cars:', err)
+      setError(err instanceof Error ? err.message : 'An error occurred')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    const fetchLocations = async () => {
+      try {
+        const response = await fetch('http://localhost:8800/locations')
+        if (!response.ok) throw new Error('Failed to fetch locations')
+        const data = await response.json()
+        setLocations(data)
+      } catch (error) {
+        console.error('Error fetching locations:', error)
+      }
+    }
+
+    fetchLocations()
+    fetchAvailableCars() // Initial fetch of all cars
+  }, []) // Empty dependency array for initial load only
+
   const isDateDisabled = (date: Date) => {
     return isBefore(date, startOfToday())
   }
 
   const handlePickupDateChange = (date: Date | undefined) => {
     setPickupDate(date)
-    // Reset return date if it's before the new pickup date
     if (date && returnDate && isBefore(returnDate, date)) {
       setReturnDate(undefined)
     }
@@ -322,17 +271,17 @@ export default function CarsPage() {
     // Fuel type filtering
     const fuelMatch =
       (!filters.diesel && !filters.gasoline) || // No fuel filter selected
-      (filters.diesel && car.fuelType === "diesel") ||
-      (filters.gasoline && car.fuelType === "gasoline")
+      (filters.diesel && car.fuel.toLowerCase() === "diesel") ||
+      (filters.gasoline && car.fuel.toLowerCase() === "gasoline")
 
     // Transmission filtering
     const transmissionMatch =
       (!filters.automatic && !filters.manual) || // No transmission filter selected
-      (filters.automatic && car.transmissionType === "automatic") ||
-      (filters.manual && car.transmissionType === "manual")
+      (filters.automatic && car.transmission.toLowerCase() === "automatic") ||
+      (filters.manual && car.transmission.toLowerCase() === "manual")
 
     // Body type filtering
-    const bodyTypeMatch = bodyType === "all" || car.bodyType === bodyType
+    const bodyTypeMatch = bodyType === "all" || car.bodyType.toLowerCase() === bodyType.toLowerCase()
 
     return fuelMatch && transmissionMatch && bodyTypeMatch
   })
@@ -342,6 +291,17 @@ export default function CarsPage() {
       ...prev,
       [filterType]: checked,
     }))
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+          <p className="mt-4 text-gray-600">Loading cars...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -357,55 +317,57 @@ export default function CarsPage() {
               <div className="mb-6">
                 <h3 className="text-lg font-bold text-gray-800 mb-4">{t("rental")}</h3>
 
-                <div className="mb-4">
-                  <Label className="text-sm text-gray-600 mb-2 block">{t("pickupLocation")}</Label>
-                  <Select value={pickupLocation} onValueChange={setPickupLocation}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t("selectCity")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {rentalLocations.map((location) => (
-                        <SelectItem key={location.value} value={location.value}>
-                          {t(location.labelKey as any)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
+                {/* Pickup Location */}
+                <div className="space-y-4">
                   <div>
-                    <Label className="text-sm text-gray-600 mb-2 block">{t("pickupDate")}</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !pickupDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {pickupDate ? format(pickupDate, "PPP") : <span>Изберете дата</span>}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={pickupDate}
-                          onSelect={handlePickupDateChange}
-                          disabled={isDateDisabled}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <Label className="text-sm text-gray-600 mb-2 block">{t("pickupLocation")}</Label>
+                    <Select value={pickupLocation} onValueChange={setPickupLocation}>
+                      <SelectTrigger className="w-full h-12 rounded-lg border-gray-200 text-gray-500">
+                        <SelectValue placeholder={isLoading ? "Loading..." : t("selectCity")} />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[300px]">
+                        {locations.filter(loc => loc.isActive).map((location) => (
+                          <SelectItem key={location._id} value={location._id}>
+                            {location.name} ({location.city})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div>
-                    <Label className="text-sm text-gray-600 mb-2 block">{t("pickupTime")}</Label>
-                    <div className="relative">
-                      <Input type="text" defaultValue="10:00" className="pr-10" />
-                      <Clock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+
+                  {/* Pickup Date and Time */}
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <Label className="text-sm text-gray-600 mb-2 block">{t("pickupDate")}</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full h-12 justify-start text-left font-normal rounded-lg border-gray-200",
+                              !pickupDate && "text-gray-500"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {pickupDate ? format(pickupDate, "dd.MM.yyyy") : <span>{t("selectDate")}</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={pickupDate}
+                            onSelect={handlePickupDateChange}
+                            disabled={isDateDisabled}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
+                    <TimeInput
+                      value={pickupTime}
+                      onChange={setPickupTime}
+                      label={t("pickupTime")}
+                    />
                   </div>
                 </div>
               </div>
@@ -414,68 +376,75 @@ export default function CarsPage() {
               <div className="mb-6">
                 <h3 className="text-lg font-bold text-gray-800 mb-4">{t("return")}</h3>
 
-                <div className="mb-4">
-                  <Label className="text-sm text-gray-600 mb-2 block">{t("returnLocation")}</Label>
-                  <Select value={returnLocation} onValueChange={setReturnLocation}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t("selectCity")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {rentalLocations.map((location) => (
-                        <SelectItem key={location.value} value={location.value}>
-                          {t(location.labelKey as any)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
+                {/* Return Location */}
+                <div className="space-y-4">
                   <div>
-                    <Label className="text-sm text-gray-600 mb-2 block">{t("returnDate")}</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !returnDate && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {returnDate ? format(returnDate, "PPP") : <span>Изберете дата</span>}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={returnDate}
-                          onSelect={setReturnDate}
-                          disabled={(date) => isDateDisabled(date) || (pickupDate ? isBefore(date, pickupDate) : false)}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <Label className="text-sm text-gray-600 mb-2 block">{t("returnLocation")}</Label>
+                    <Select value={returnLocation} onValueChange={setReturnLocation}>
+                      <SelectTrigger className="w-full h-12 rounded-lg border-gray-200 text-gray-500">
+                        <SelectValue placeholder={isLoading ? "Loading..." : t("selectCity")} />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-[300px]">
+                        {locations.filter(loc => loc.isActive).map((location) => (
+                          <SelectItem key={location._id} value={location._id}>
+                            {location.name} ({location.city})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <div>
-                    <Label className="text-sm text-gray-600 mb-2 block">{t("returnTime")}</Label>
-                    <div className="relative">
-                      <Input type="text" defaultValue="10:00" className="pr-10" />
-                      <Clock className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+
+                  {/* Return Date and Time */}
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <Label className="text-sm text-gray-600 mb-2 block">{t("returnDate")}</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full h-12 justify-start text-left font-normal rounded-lg border-gray-200",
+                              !returnDate && "text-gray-500"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {returnDate ? format(returnDate, "dd.MM.yyyy") : <span>{t("selectDate")}</span>}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={returnDate}
+                            onSelect={setReturnDate}
+                            disabled={(date) => isDateDisabled(date) || (pickupDate ? isBefore(date, pickupDate) : false)}
+                            initialFocus
+                            fromDate={pickupDate}
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
+                    <TimeInput
+                      value={returnTime}
+                      onChange={setReturnTime}
+                      label={t("returnTime")}
+                    />
                   </div>
                 </div>
               </div>
 
-              <Link
-                href={`/search?pickup=${pickupLocation}&return=${returnLocation}&pickupDate=${
-                  pickupDate ? format(pickupDate, "yyyy-MM-dd") : ""
-                }&returnDate=${returnDate ? format(returnDate, "yyyy-MM-dd") : ""}&pickupTime=10:00&returnTime=10:00`}
+              <Button 
+                className="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 rounded-lg mb-6"
+                disabled={!pickupDate || !returnDate || !pickupLocation || !returnLocation || isLoading}
+                onClick={fetchAvailableCars}
               >
-                <Button className="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 rounded-lg mb-6">
-                  {t("search")}
-                </Button>
-              </Link>
+                {isLoading ? t("loading") : t("search")}
+              </Button>
+
+              {error && (
+                <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg">
+                  {error}
+                </div>
+              )}
 
               {/* Filters Section */}
               <div className="border-t pt-6">
@@ -552,11 +521,11 @@ export default function CarsPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">Всички</SelectItem>
-                      <SelectItem value="sedan">Седан</SelectItem>
-                      <SelectItem value="hatchback">Хечбек</SelectItem>
-                      <SelectItem value="suv">SUV</SelectItem>
-                      <SelectItem value="coupe">Купе</SelectItem>
+                      <SelectItem value="all">{t("all")}</SelectItem>
+                      <SelectItem value="sedan">{t("sedan")}</SelectItem>
+                      <SelectItem value="hatchback">{t("hatchback")}</SelectItem>
+                      <SelectItem value="suv">{t("suv")}</SelectItem>
+                      <SelectItem value="coupe">{t("coupe")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -578,12 +547,21 @@ export default function CarsPage() {
             <div className="space-y-6">
               {filteredCars.length > 0 ? (
                 filteredCars.map((car) => (
-                  <div key={car.id} className="bg-white rounded-lg shadow-sm p-6">
-                    <div className="grid md:grid-cols-3 gap-6 items-center">
+                  <div 
+                    key={car._id} 
+                    className="relative bg-white rounded-lg shadow-sm p-6 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl group"
+                  >
+                    {/* Gradient border overlay */}
+                    <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500 to-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ padding: '2px' }}>
+                      <div className="h-full w-full bg-white rounded-lg"></div>
+                    </div>
+                    
+                    {/* Content container */}
+                    <div className="relative z-10 grid md:grid-cols-3 gap-6 items-center">
                       {/* Car Image */}
                       <div className="md:col-span-1">
                         <Image
-                          src={car.image || "/placeholder.svg"}
+                          src={car.mainImage ? `http://localhost:8800${car.mainImage}` : "/placeholder.svg"}
                           alt={car.name}
                           width={300}
                           height={200}
@@ -595,38 +573,28 @@ export default function CarsPage() {
                       <div className="md:col-span-1">
                         <div className="flex items-start gap-2 mb-4">
                           <h3 className="text-xl font-bold text-blue-600">{car.name}</h3>
-                          <div className="flex flex-wrap gap-1">
-                            {car.badges.map((badge, index) => (
-                              <span
-                                key={index}
-                                className="px-2 py-1 rounded-full text-xs font-semibold bg-orange-400 text-white"
-                              >
-                                {badge}
-                              </span>
-                            ))}
-                          </div>
                         </div>
 
                         <div className="space-y-2">
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Fuel className="w-4 h-4 text-blue-500" />
-                            <span>{t("gasoline")}</span>
+                            <span>{t("engineType")}: {car.engine}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Settings className="w-4 h-4 text-blue-500" />
-                            <span>{t("manual")}</span>
+                            <span>{t("transmission")}: {car.transmission}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Users className="w-4 h-4 text-blue-500" />
-                            <span>5 {t("seats")}</span>
+                            <span>{car.seats} {t("seats")}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
                             <Car className="w-4 h-4 text-blue-500" />
-                            <span>4/5 {t("doors")}</span>
+                            <span>{car.doors} {t("doors")}</span>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <span className="w-4 h-4 bg-blue-500 rounded-full"></span>
-                            <span>{car.category}</span>
+                            <Gauge className="w-4 h-4 text-blue-500" />
+                            <span>{t("fuelConsumption")}: {car.consumption}</span>
                           </div>
                         </div>
                       </div>
@@ -634,12 +602,12 @@ export default function CarsPage() {
                       {/* Price and Action */}
                       <div className="md:col-span-1 text-right">
                         <div className="mb-4">
-                          <div className="text-3xl font-bold text-blue-600">{formatPrice(car.price)}</div>
+                          <div className="text-3xl font-bold text-blue-600">{formatPrice(car.pricing["1_3"].toString())}</div>
                           <div className="text-sm text-gray-500">{t("perDay")}</div>
                         </div>
-                        <Link href={`/cars/${car.id}`}>
-                          <Button className="bg-teal-500 hover:bg-teal-600 text-white font-semibold px-6 py-2">
-                            {t("seeMore")}
+                        <Link href={`/cars/${car._id}`}>
+                          <Button className="bg-gradient-to-r from-blue-500 to-green-500 text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-green-600 transition-all duration-300 font-semibold px-6 py-2 rounded-3xl">
+                            {t("viewDetails")}
                           </Button>
                         </Link>
                       </div>
@@ -656,6 +624,7 @@ export default function CarsPage() {
           </div>
         </div>
       </div>
+      <FooterSection />
     </div>
   )
 }

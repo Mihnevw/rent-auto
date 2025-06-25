@@ -3,164 +3,184 @@
 import Image from "next/image"
 import { Header } from "@/components/header"
 import { useLanguage } from "@/lib/language-context"
+import { FooterSection } from "@/components/sections/footer-section"
 
 export default function MonthlyOffersPage() {
   const { t, formatPrice } = useLanguage()
+
+  const carSpecs = [
+    { year: "2021", transmission: t("automatic"), fuel: t("diesel"), doors: "5" },
+    { year: "2020", transmission: t("automatic"), fuel: t("diesel"), doors: "5" },
+    { year: "2021", transmission: t("automatic"), fuel: t("diesel"), doors: "5" },
+    { year: "2017", transmission: t("automatic"), fuel: t("diesel"), doors: "5" },
+    { year: "2021", transmission: t("automatic"), fuel: t("diesel"), doors: "5" },
+  ]
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8 mt-8 sm:mt-10" role="main">
         {/* Page Title */}
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">{t("monthlyOffersTitle")}</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 sm:mb-8" id="page-title">{t("monthlyOffersTitle")}</h1>
 
         {/* Header Section */}
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">{t("monthlyOffersSubtitle")}</h2>
-          <p className="text-lg text-gray-700 mb-2">
-            {/* ЗА ПЕРИОДИ 3 МЕСЕЦА+ МОЛЯ ДА СЕ СВЪРЖЕТЕ С НАС ЗА ИНДИВИДУАЛНА ОФЕРТА* */}
+        <section className="text-center mb-6 sm:mb-8" aria-labelledby="offers-subtitle">
+          <h2 id="offers-subtitle" className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">{t("monthlyOffersSubtitle")}</h2>
+          <p className="text-base sm:text-lg text-gray-700 mb-2">
             {t("contactForOffer")}*
           </p>
-          <p className="text-sm text-gray-500">*Посочените цени не важат за периода от 01.09 до 31.05.</p>
-        </div>
+          <p className="text-xs sm:text-sm text-gray-500">{t("pricePeriod")}</p>
+        </section>
 
-        {/* Car Offer Card */}
-        <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 shadow-sm">
-          <div className="grid lg:grid-cols-2 gap-8 items-center">
-            {/* Left Side - Car Details */}
-            <div>
-              <h3 className="text-2xl font-bold text-gray-800 mb-6">VW UP move</h3>
+        {/* Car Offers Section */}
+        <section className="car-offers space-y-6 sm:space-y-10" aria-labelledby="car-offers-title">
+          <h2 id="car-offers-title" className="sr-only">Available Monthly Car Offers</h2>
 
-              {/* Car Specifications */}
-              <div className="space-y-3 mb-8">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-700">{t("year")}: 2021 г.</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-700">{t("transmission")}: ръчна</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-700">{t("fuel")}: бензин</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-gray-700">{t("doorsCount")}: 5</span>
-                </div>
-              </div>
+          {/* Car Offer Cards */}
+          {["BMW 3", "BMW 5", "Mercedes GLC", "Range Rover", "Mercedes C-Class"].map((carName, index) => (
+            <div key={carName} className="bg-white rounded-2xl border-2 border-[#c4ec64] p-4 sm:p-8 shadow-sm">
+              <div className="grid lg:grid-cols-2 gap-4 sm:gap-8 items-center">
+                {/* Left Side - Car Details */}
+                <div>
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-4 sm:mb-6">{carName}</h3>
 
-              {/* Pricing Section */}
-              <div className="space-y-4">
-                <div>
-                  <p className="text-gray-700 font-semibold mb-2">{t("priceForRental")}</p>
-                  <p className="text-2xl font-bold text-gray-800">{formatPrice(1050)}/МЕСЕЦ</p>
+                  {/* Car Specifications */}
+                  <div className="space-y-2 sm:space-y-3 mb-6 sm:mb-8">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm sm:text-base text-gray-700">
+                        {t("carYear")}: <span className="text-gray-900 font-semibold">{carSpecs[index].year}</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm sm:text-base text-gray-700">
+                        {t("transmission")}: <span className="text-gray-900 font-semibold">{carSpecs[index].transmission}</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm sm:text-base text-gray-700">
+                        {t("fuel")}: <span className="text-gray-900 font-semibold">{carSpecs[index].fuel}</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-sm sm:text-base text-gray-700">
+                        {t("doorsCount")}: <span className="text-gray-900 font-semibold">{carSpecs[index].doors}</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Pricing Section */}
+                  <div className="space-y-3 sm:space-y-4">
+                    <div>
+                      <p className="text-sm sm:text-base text-gray-700 font-semibold mb-1 sm:mb-2">{t("priceForRental")}</p>
+                      <p className="text-xl sm:text-2xl font-bold text-gray-800">
+                        {formatPrice([1050, 1200, 1300, 1400, 1800][index])}/
+                        <span className="text-gray-900 font-semibold">{t("perMonth")}</span>
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-lg sm:text-xl font-bold text-gray-800">
+                        {formatPrice([400, 400, 600, 600, 600][index])}
+                        <span className="text-gray-900 font-semibold"> {t("deposit")}</span>
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm sm:text-base text-gray-700 font-semibold">
+                        {t("mileageLimit")}: <span className="text-gray-900 font-semibold">1000 {t("kmLimit")}</span>
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xl font-bold text-gray-800">
-                    {formatPrice(400)} {t("deposit")}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-gray-700 font-semibold">{t("mileageLimit")}</p>
+
+                {/* Right Side - Car Image */}
+                <div className="flex justify-center mt-4 lg:mt-0">
+                  <Image
+                    src={`/images/${["bmw-3", "bmw-5", "glc", "range", "mercedes"][index]}.png?height=300&width=500`}
+                    alt={carName}
+                    width={500}
+                    height={300}
+                    className="max-w-full h-auto rounded-lg"
+                  />
                 </div>
               </div>
             </div>
+          ))}
+        </section>
 
-            {/* Right Side - Car Image */}
-            <div className="flex justify-center">
-              <Image
-                src="/placeholder.svg?height=300&width=500"
-                alt="VW UP move white car"
-                width={500}
-                height={300}
-                className="max-w-full h-auto"
-              />
-            </div>
-          </div>
-        </div>
+        {/* Additional Information Section */}
+        <section className="mt-8 sm:mt-12 grid md:grid-cols-2 gap-4 sm:gap-8" aria-labelledby="additional-info">
+          <h2 id="additional-info" className="sr-only">Additional Rental Information</h2>
 
-        {/* Additional Information */}
-        <div className="mt-12 grid md:grid-cols-2 gap-8">
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">{t("longTermAdvantages")}</h3>
-            <ul className="space-y-3 text-gray-700">
-              <li className="flex items-start gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                <span>Значителни отстъпки при дългосрочни договори</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                <span>Гъвкави условия за плащане</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                <span>Пълна поддръжка и сервиз включени</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                <span>Възможност за смяна на автомобила</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
-                <span>24/7 техническа поддръжка</span>
-              </li>
+          <article className="bg-white rounded-lg p-4 sm:p-6 shadow-sm" aria-labelledby="advantages-title">
+            <h3 id="advantages-title" className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">{t("longTermAdvantages")}</h3>
+            <ul role="list" className="space-y-2 sm:space-y-3 text-sm sm:text-base text-gray-700">
+              {[
+                t("significantDiscounts"),
+                t("flexiblePaymentTerms"),
+                t("fullMaintenanceIncluded"),
+                t("carChangeOption"),
+                t("technicalSupport24_7")
+              ].map((advantage, index) => (
+                <li key={index} className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                  <span>{advantage}</span>
+                </li>
+              ))}
             </ul>
-          </div>
+          </article>
 
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">{t("longTermConditions")}</h3>
-            <ul className="space-y-3 text-gray-700">
-              <li className="flex items-start gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                <span>Минимален период - 3 месеца</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                <span>Депозит се заплаща при подписване на договора</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                <span>Месечното плащане се извършва авансово</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                <span>При надвишаване на пробега - 0.30 лв/км</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                <span>Възможност за предсрочно прекратяване</span>
-              </li>
+          <article className="bg-white rounded-lg p-4 sm:p-6 shadow-sm" aria-labelledby="conditions-title">
+            <h3 id="conditions-title" className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">{t("longTermConditions")}</h3>
+            <ul role="list" className="space-y-2 sm:space-y-3 text-sm sm:text-base text-gray-700">
+              {[
+                t("minimumPeriod"),
+                t("depositPayment"),
+                t("monthlyPaymentInAdvance"),
+                t("mileageExcess"),
+                t("earlyTermination")
+              ].map((condition, index) => (
+                <li key={index} className="flex items-start gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                  <span>{condition}</span>
+                </li>
+              ))}
             </ul>
-          </div>
-        </div>
+          </article>
+        </section>
 
         {/* Contact Section */}
-        <div className="mt-12 bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-lg">
-          <h3 className="text-xl font-bold text-blue-800 mb-4">{t("contactForPersonalOffer")}</h3>
-          <div className="grid md:grid-cols-2 gap-6">
+        <section className="mt-8 sm:mt-12 bg-blue-50 border-l-4 border-blue-500 p-4 sm:p-6 rounded-r-lg" aria-labelledby="contact-title">
+          <h3 id="contact-title" className="text-lg sm:text-xl font-bold text-blue-800 mb-3 sm:mb-4">{t("contactForPersonalOffer")}</h3>
+          <div className="grid md:grid-cols-2 gap-4 sm:gap-6">
             <div>
-              <p className="text-blue-700 mb-2">
-                <strong>Телефон:</strong> +359 898 636 246
-              </p>
-              <p className="text-blue-700 mb-2">
-                <strong>Email:</strong> info@dlrent.bg
-              </p>
-              <p className="text-blue-700">
-                <strong>Работно време:</strong> Пн-Пт 08:00-18:00
-              </p>
+              <dl className="text-sm sm:text-base">
+                <dt className="sr-only">{t("phone")}</dt>
+                <dd className="text-blue-700 mb-2">
+                  <strong>{t("phone")}:</strong> <a href="tel:+359894818283" className="hover:underline" aria-label="Call us">+359 894 818 283</a>
+                </dd>
+                <dt className="sr-only">Email</dt>
+                <dd className="text-blue-700 mb-2">
+                  <strong>Email:</strong> <a href="mailto:info@dlrent.bg" className="hover:underline" aria-label="Email us">info@dlrent.bg</a>
+                </dd>
+                <dt className="sr-only">{t("workingHours")}</dt>
+                <dd className="text-blue-700">
+                  <strong>{t("workingHours")}:</strong> <time>{t("workingHoursShort")}</time>
+                </dd>
+              </dl>
             </div>
             <div>
-              <p className="text-blue-700 text-sm">
-                Нашият екип ще подготви персонализирана оферта според вашите нужди и изисквания. Предлагаме различни
-                модели автомобили и гъвкави условия за дългосрочен наем.
+              <p className="text-xs sm:text-sm text-blue-700">
+                {t("personalizedOffer")}
               </p>
             </div>
           </div>
-        </div>
-      </div>
+        </section>
+      </main>
+      <FooterSection />
     </div>
   )
 }

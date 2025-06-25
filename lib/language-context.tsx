@@ -1,48 +1,97 @@
 "use client"
 
-import { createContext, useContext, useState, type ReactNode } from "react"
-import { type Language, translations, type TranslationKey } from "./translations"
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+} from "react"
+import { translations } from "./translations"
+import type { Language, TranslationKey } from "./translations"
 
 interface LanguageContextType {
   language: Language
   setLanguage: (lang: Language) => void
   t: (key: TranslationKey) => string
   formatPrice: (price: number | string) => string
+  isLoaded: boolean
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 // BGN to EUR conversion rate (approximate)
-const BGN_TO_EUR_RATE = 0.51
+const BGN_TO_EUR_RATE = 0.511292
+
+const LANGUAGE_STORAGE_KEY = "preferred-language"
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>("bg")
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  // Load language preference after initial render
+  useEffect(() => {
+    const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY)
+    if (stored === "en" || stored === "bg") {
+      setLanguage(stored)
+    } else {
+      const browserLang = navigator.language.toLowerCase()
+      setLanguage(browserLang.startsWith("en") ? "en" : "bg")
+    }
+    setIsLoaded(true)
+  }, [])
+
+  // Save language preference
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, language)
+    }
+  }, [language, isLoaded])
+
+  const handleSetLanguage = (newLang: Language) => {
+    setLanguage(newLang)
+  }
 
   const t = (key: TranslationKey): string => {
-    return translations[language][key] || translations.bg[key] || key
+    const currentTranslations = translations[language] as Record<TranslationKey, string>
+    const fallbackTranslations = translations.bg as Record<TranslationKey, string>
+    
+    const translation = currentTranslations?.[key] ?? fallbackTranslations[key]
+    return translation || key
   }
 
   const formatPrice = (price: number | string): string => {
     if (price === null || price === undefined) {
-      return language === "en" ? "€0" : "0лв."
+      return language === "en" ? "€0.00" : "0.00лв."
     }
 
-    const numPrice = typeof price === "string" ? Number.parseFloat(price) : price
-    
+    const numPrice =
+      typeof price === "string" ? Number.parseFloat(price) : price
+
     if (Number.isNaN(numPrice)) {
-      return language === "en" ? "€0" : "0лв."
+      return language === "en" ? "€0.00" : "0.00лв."
     }
 
     if (language === "en") {
-      const eurPrice = (numPrice * BGN_TO_EUR_RATE).toFixed(0)
+      const eurPrice = (numPrice * BGN_TO_EUR_RATE).toFixed(2)
       return `€${eurPrice}`
     } else {
-      return `${numPrice.toFixed(0)}лв.`
+      return `${numPrice.toFixed(2)}лв.`
     }
   }
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, formatPrice }}>{children}</LanguageContext.Provider>
+    <LanguageContext.Provider
+      value={{
+        language,
+        setLanguage: handleSetLanguage,
+        t,
+        formatPrice,
+        isLoaded
+      }}
+    >
+      {children}
+    </LanguageContext.Provider>
   )
 }
 
@@ -53,3 +102,5 @@ export function useLanguage() {
   }
   return context
 }
+
+export type { Language, TranslationKey }

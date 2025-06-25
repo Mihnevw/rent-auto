@@ -1,32 +1,46 @@
 import { MongoClient, Db } from 'mongodb'
-import type { Car } from '@/models/car';
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Missing MONGODB_URI environment variable')
 }
 
-// Ensure we have the database name in the URI
 const uri = process.env.MONGODB_URI
-const client = new MongoClient(uri, {
+const options = {
   connectTimeoutMS: 10000, // 10 seconds
   socketTimeoutMS: 45000,  // 45 seconds
-})
+}
 
+let client: MongoClient
 let clientPromise: Promise<MongoClient>
 
 if (process.env.NODE_ENV === 'development') {
-  // In development, use a global variable so the value is preserved across module reloads
-  if (!(global as any)._mongoClientPromise) {
-    ;(global as any)._mongoClientPromise = client.connect()
+  // In development, use a global variable so that the value
+  // is preserved across module reloads caused by HMR (Hot Module Replacement).
+  let globalWithMongo = global as typeof globalThis & {
+    _mongoClientPromise?: Promise<MongoClient>
+  }
+
+  if (!globalWithMongo._mongoClientPromise) {
+    client = new MongoClient(uri, options)
+    globalWithMongo._mongoClientPromise = client.connect()
+      .then(client => {
+        console.log('MongoDB connected successfully')
+        return client
+      })
       .catch(err => {
         console.error('MongoDB connection error:', err)
         throw err
       })
   }
-  clientPromise = (global as any)._mongoClientPromise
+  clientPromise = globalWithMongo._mongoClientPromise
 } else {
-  // In production, create a new client for every connection
+  // In production, it's best to not use a global variable.
+  client = new MongoClient(uri, options)
   clientPromise = client.connect()
+    .then(client => {
+      console.log('MongoDB connected successfully')
+      return client
+    })
     .catch(err => {
       console.error('MongoDB connection error:', err)
       throw err
@@ -36,7 +50,8 @@ if (process.env.NODE_ENV === 'development') {
 export async function getMongoDb(): Promise<Db> {
   try {
     const client = await clientPromise
-    return client.db('rent-car') // Explicitly specify the database name
+    const db = client.db()
+    return db
   } catch (err) {
     console.error('Error getting MongoDB database:', err)
     throw err

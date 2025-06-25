@@ -1,4 +1,6 @@
-import { useState } from "react"
+"use client"
+
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -6,239 +8,169 @@ import { Settings, Car, Fuel, DoorOpen } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
 import { type TranslationKey } from "@/lib/translations"
 
-interface CarData {
+interface Location {
   _id: string
   name: string
-  image: string
-  transmission: TranslationKey
-  category: TranslationKey
-  doors?: string
-  price: number
-  fuel: string
+  address: string
+  city: string
+  isActive: boolean
 }
 
-const carsList: CarData[] = [
-  {
-    _id: "65f85a300000000000000001",
-    name: "SHKODA RAPID 2016",
-    image: "/images/rapid.png",
-    transmission: "manual",
-    category: "sedan",
-    doors: "4/5",
-    fuel: "petrol",
-    price: 40
-  },
-  {
-    _id: "65f85a300000000000000002",
-    name: "MERCEDES-BENZ GLC 2021",
-    image: "/images/glc.png",
-    transmission: "automatic",
-    category: "suv",
-    doors: "4/5",
-    fuel: "petrol",
-    price: 90
-  },
-  {
-    _id: "65f85a300000000000000003",
-    name: "BMW 3-SERIES 2021",
-    image: "/images/bmw-3.png",
-    transmission: "automatic",
-    category: "sedan",
-    doors: "4/5",
-    fuel: "petrol",
-    price: 65
-  },
-  {
-    _id: "65f85a300000000000000004",
-    name: "BMW 5-SERIES 2020",
-    image: "/images/bmw-5.png",
-    transmission: "automatic",
-    category: "sedan",
-    doors: "4/5",
-    fuel: "petrol",
-    price: 75
-  },
-  {
-    _id: "65f85a300000000000000005",
-    name: "MASERATI GHIBLI 2017",
-    image: "/images/maserati.png",
-    transmission: "automatic",
-    category: "sedan",
-    doors: "4/5",
-    fuel: "petrol",
-    price: 90
-  },
-  {
-    _id: "65f85a300000000000000006",
-    name: "JAGUAR F-TYPE 2019",
-    image: "/images/jaguar-f.png",
-    transmission: "automatic",
-    category: "sedan",
-    doors: "4/5",
-    fuel: "petrol",
-    price: 150
-  },
-  {
-    _id: "65f85a300000000000000007",
-    name: "SHKODA OCTAVIA 2020",
-    image: "/images/shkoda.png",
-    transmission: "automatic",
-    category: "sedan",
-    fuel: "petrol",
-    price: 60
-  },
-  {
-    _id: "65f85a300000000000000008",
-    name: "RANGE ROVER 2014",
-    image: "/images/range.png",
-    transmission: "automatic",
-    category: "suv",
-    fuel: "petrol",
-    price: 75
-  },
-  {
-    _id: "65f85a300000000000000009",
-    name: "OPEL INSIGNIA 2019",
-    image: "/images/opel.png",
-    transmission: "automatic",
-    category: "sedan",
-    fuel: "petrol",
-    price: 60
-  },
-  {
-    _id: "65f85a300000000000000010",
-    name: "MERCEDES C220 2021",
-    image: "/images/mercedes.png",
-    transmission: "automatic",
-    category: "sedan",
-    fuel: "petrol",
-    price: 75
-  },
-  {
-    _id: "65f85a300000000000000011",
-    name: "FORD FOCUS 2021",
-    image: "/images/ford-focus.png",
-    transmission: "automatic",
-    category: "sedan",
-    fuel: "petrol",
-    price: 55
-  },
-  {
-    _id: "65f85a300000000000000012",
-    name: "FORD MONDEO 2021",
-    image: "/images/ford-mondeo.png",
-    transmission: "automatic",
-    category: "sedan",
-    fuel: "petrol",
-    price: 60
-  },
-  {
-    _id: "65f85a300000000000000013",
-    name: "VOLKSWAGEN PASSAT 2021",
-    image: "/images/passat.png",
-    transmission: "automatic",
-    category: "sedan",
-    fuel: "petrol",
-    price: 60
-  },
-  {
-    _id: "65f85a300000000000000014",
-    name: "CITROEN GRAND C4 PICASSO 2016",
-    image: "/images/citroen.png",
-    transmission: "manual",
-    category: "suv",
-    fuel: "petrol",
-    price: 60
-  },
-  {
-    _id: "65f85a300000000000000015",
-    name: "SHKODA OCTAVIA 2012",
-    image: "/images/shkoda-octavia.png",
-    transmission: "manual",
-    category: "sedan",
-    fuel: "petrol",
-    price: 35
-  },
-  {
-    _id: "65f85a300000000000000016",
-    name: "MERCEDES-BENZ E-CLASS 2020",
-    image: "/images/mercedes-e.png",
-    transmission: "manual",
-    category: "sedan",
-    fuel: "petrol",
-    price: 70
-  },
-  {
-    _id: "65f85a300000000000000017",
-    name: "SHKODA SUPERB 2021",
-    image: "/images/superb.png",
-    transmission: "automatic",
-    category: "sedan",
-    fuel: "petrol",
-    price: 65
+interface Car {
+  _id: string
+  make: string
+  model: string
+  name: string
+  mainImage: string
+  thumbnails: string[]
+  engine: string
+  fuel: string
+  transmission: string
+  seats: string
+  doors: string
+  year: string
+  consumption: string
+  bodyType: string
+  priceIncludes: string[]
+  features: string[]
+  pricing: {
+    "1_3": number
+    "4_7": number
+    "8_14": number
+    "15_plus": number
   }
-]
+  currentLocation: Location
+}
 
 export function CarsSection() {
   const { t, formatPrice } = useLanguage()
   const [currentPage, setCurrentPage] = useState(1)
-  const carsPerPage = 9
+  const [cars, setCars] = useState<Car[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const carsPerPage = 6
 
-  // Изчисляване на показваните коли за текущата страница
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        const response = await fetch('http://localhost:8800/cars')
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        const data = await response.json()
+        setCars(data)
+      } catch (err) {
+        console.error('Fetch error:', err)
+        setError(err instanceof Error ? err.message : 'Failed to fetch cars')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCars()
+  }, [])
+  
+  // Calculate total number of pages
+  const totalPages = Math.ceil(cars.length / carsPerPage)
+
+  // Calculate cars for current page
   const indexOfLastCar = currentPage * carsPerPage
   const indexOfFirstCar = indexOfLastCar - carsPerPage
-  const currentCars = carsList.slice(indexOfFirstCar, indexOfLastCar)
+  const currentCars = cars.slice(indexOfFirstCar, indexOfLastCar)
+
+  // Handle page change with scroll
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber)
+    // Scroll to the top of the cars section
+    window.scrollTo({
+      top: document.getElementById('cars-section')?.offsetTop || 0,
+      behavior: 'smooth'
+    })
+  }
+
+  if (loading) {
+    return (
+      <section id="cars-section" className="py-8 sm:py-12 lg:py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-blue-600 mb-8 sm:mb-12">{t("ourCars")}</h2>
+          <div className="flex justify-center items-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section id="cars-section" className="py-8 sm:py-12 lg:py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-blue-600 mb-8 sm:mb-12">{t("ourCars")}</h2>
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+            <p className="text-red-700">{error}</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   return (
-    <section className="py-16 bg-gray-50">
+    <section id="cars-section" className="py-8 sm:py-12 lg:py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center text-blue-600 mb-12">{t("ourCars")}</h2>
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-blue-600 mb-8 sm:mb-12">{t("ourCars")}</h2>
 
-        {/* Мрежа с коли */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+        {/* Cars grid */}
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8">
           {currentCars.map((car) => (
-            <div key={car._id} className="bg-white rounded-lg shadow-sm p-6 flex flex-col h-full">
+            <div 
+              key={car._id} 
+              className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-[1.02] p-4 sm:p-6 flex flex-col h-full"
+            >
               <div className="mb-4">
-                <h3 className="text-lg font-bold text-blue-600 mb-4">{car.name}</h3>
-                <div className="relative aspect-[4/3]">
+                <h3 className="text-base sm:text-lg font-bold text-blue-600 mb-3 sm:mb-4 line-clamp-1">{car.name}</h3>
+                <div className="relative aspect-[4/3] mb-4">
                   <Image
-                    src={car.image}
+                    src={car.mainImage.startsWith('http') ? car.mainImage : `http://localhost:8800${car.mainImage}`}
                     alt={car.name}
                     fill
                     className="object-contain"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    priority={currentPage === 1 && car === currentCars[0]}
                   />
                 </div>
               </div>
 
               <div className="flex-grow">
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Settings className="w-4 h-4 text-blue-500" />
-                    <span>{t(car.transmission)}</span>
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4">
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                    <Settings className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    <span className="truncate">{car.transmission}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <DoorOpen className="w-4 h-4 text-blue-500" />
-                    <span>{car.doors ?? '-'}</span>
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                    <DoorOpen className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    <span className="truncate">{car.doors} {t("doors")}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Car className="w-4 h-4 text-blue-500" />
-                    <span>{t(car.category)}</span>
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                    <Car className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    <span className="truncate">{car.bodyType}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Fuel className="w-4 h-4 text-blue-500" />
-                    <span>{car.fuel}</span>
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
+                    <Fuel className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    <span className="truncate">{car.fuel}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4">
+              <div className="mt-auto">
                 <div className="text-center mb-4">
-                  <div className="text-3xl font-bold text-blue-600">{formatPrice(car.price)}</div>
-                  <div className="text-sm text-gray-500">{t("perDay")}</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600">{formatPrice(car.pricing["1_3"])}</div>
+                  <div className="text-xs sm:text-sm text-gray-500">{t("perDay")}</div>
                 </div>
 
                 <Link href={`/cars/${car._id}`}>
-                  <Button className="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white font-semibold">
+                  <Button 
+                    className="w-full bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white font-semibold px-4 sm:px-6 py-2 text-sm sm:text-base transition-all duration-300 hover:shadow-lg"
+                  >
                     {t("seeMore")}
                   </Button>
                 </Link>
@@ -247,24 +179,25 @@ export function CarsSection() {
           ))}
         </div>
 
-        {/* Контроли за страници */}
-        <div className="flex justify-center items-center gap-4 mt-8">
-          <button
-            onClick={() => setCurrentPage(1)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${currentPage === 1 ? 'bg-orange-400 scale-110' : 'bg-gray-300 hover:bg-orange-400/70'}`}
-            aria-label="Go to page 1"
-          />
-          <button
-            onClick={() => setCurrentPage(2)}
-            className={`w-3 h-3 rounded-full transition-all duration-300 ${currentPage === 2 ? 'bg-orange-400 scale-110' : 'bg-gray-300 hover:bg-orange-400/70'}`}
-            aria-label="Go to page 2"
-          />
-        </div>
-
-        {/* Индикатор на страницата */}
-        <div className="text-center text-sm text-gray-500 mt-4">
-          {`${currentPage}/2`}
-        </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center gap-2">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNumber) => (
+              <Button
+                key={pageNumber}
+                onClick={() => handlePageChange(pageNumber)}
+                variant={currentPage === pageNumber ? "default" : "outline"}
+                className={`min-w-[2.5rem] h-10 px-4 ${
+                  currentPage === pageNumber 
+                    ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                    : "text-blue-600 hover:bg-blue-50"
+                }`}
+              >
+                {pageNumber}
+              </Button>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

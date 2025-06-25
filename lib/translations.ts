@@ -15,6 +15,9 @@ export const translations = {
     seeMore: "ВИЖ ПОВЕЧЕ",
     rent: "НАЕМИ",
     rental: "НАЕМАНЕ",
+    bookNow: "РЕЗЕРВИРАЙ СЕГА",
+    selectDate: "Изберете дата",
+    allRightsReserved: "Всички права запазени.",
     address: "Адрес",
     workingHours: "Работно време",
     mondayFriday: "Понеделник - Петък: 08:00 - 18:00",
@@ -29,6 +32,8 @@ export const translations = {
     deposit: "ДЕПОЗИТ",
     mileageLimit: "ПРОБЕГ ДО 3000 КМ/МЕСЕЦ",
     priceForPeriod: "Цена за периода",
+    pricePerDay: "Цена на ден",
+    totalPrice: "Общо",
 
     // Homepage
     carsForRent: "Автомобили под наем",
@@ -41,7 +46,7 @@ export const translations = {
     returnTime: "Час на връщане",
     search: "ТЪРСЕНЕ",
     ourCars: "Нашите автомобили под наем",
-    perDay: "на ден",
+    perDay: "ден",
     lightCars: "Леки автомобили",
     suvs: "Джипове",
     vans: "Бусове",
@@ -62,10 +67,31 @@ export const translations = {
     compact: "Компактни",
     suv: "SUV",
     sedan: "Седан",
+    hatchback: "Хечбек",
+    coupe: "Купе",
+    all: "Всички",
 
     // About page
-    aboutTitle: "За нас",
-    aboutSubtitle: "Вашият надежден партньор за наем на автомобили в България",
+    aboutTitle: "Кои сме ние ?",
+    aboutMainDescription: "AUTO RENT е водеща компания за автомобили под наем, предлагаща надеждни, удобни и прозрачни услуги за клиенти в България. Нашата основна мисия е да осигурим комфортно, сигурно и безпроблемно пътуване с качествени автомобили, без скрити такси и с включено пълно автокаско.",
+    officialRegistration: "Официална регистрация",
+    registrationInfo: "AUTO RENT е фирма регистрирана в търговския регистър като:",
+    companyName: "АВТО РЕНТ ЕООД",
+    companyAddress: "Адрес: гр. Слънчев бряг",
+    ourLocations: "Нашите локации:",
+    deliveryToAddress: "Доставка до адрес",
+    deliveryDescription: "Автомобилите се доставят до адрес, директно до дома Ви или до летището. Тази екстра Ви спестява ходене до локацията с такси или градски транспорт, за да получите автомобила, който искате да наемете.",
+    ourFleet: "Нашият автопарк",
+    fleetDescription: "Компанията развива своята дейност с отдаване на автомобили под наем от началото на 2023г. Предлагаме нови коли от висок клас. Цели ни е да осигурим максимален комфорт при избирането, ситуирност на пътя, приятна атмосфера при дълги пътувания и всякакъв вид автомобилно удобство с множеството екстри, с които са снабдени автомобилите ни. Всички автомобили се обслужват само в оторизиран сервизи, с което гарантираме безупречното техническо състояние на всички наши автомобили.",
+    finalNote: "За краткия ни опит в бранша можем да бъдем горди с това, че нямаме разочарован или недоволен клиент от нашите услуги. Отличаваме се да удовлетворим всички изисквания и желания на нашите клиенти, и мислим, че успяваме.",
+    experienceSince2023: "С опит от 2023г.",
+    satisfiedClients: "100% доволни клиенти",
+    newVehicles: "Нови автомобили",
+    professionalService: "Професионален сервиз",
+    aboutPageTitle: "За AUTO Rent | Премиум автомобили под наем в България",
+    aboutPageDescription: "Научете повече за AUTO Rent - водещата компания за автомобили под наем в България. Нов автопарк, множество локации и изключително обслужване от 2023г. 100% удовлетвореност на клиентите.",
+    aboutPageOgTitle: "За AUTO Rent - Премиум компания за автомобили под наем",
+    aboutPageOgDescription: "Водеща компания за автомобили под наем в България с нов автопарк и множество локации. Професионално обслужване и 100% удовлетвореност на клиентите.",
 
     // Services
     servicesTitle: "Услуги",
@@ -93,6 +119,7 @@ export const translations = {
     monthlyOffersTitle: "Дългосрочни наеми",
     monthlyOffersSubtitle: "ПРЕДЛОЖЕНИЯ ЗА МЕСЕЧНИ НАЕМИ",
     contactForOffer: "ЗА ПЕРИОДИ 3 МЕСЕЦА+ МОЛЯ ДА СЕ СВЪРЖЕТЕ С НАС ЗА ИНДИВИДУАЛНА ОФЕРТА*",
+    pricePeriod: "*Посочените цени не важат за периода от 01.09 до 31.05.",
     longTermAdvantages: "Предимства на дългосрочния наем",
     longTermConditions: "Условия за дългосрочен наем",
     contactForPersonalOffer: "Свържете се с нас за индивидуална оферта",
@@ -103,20 +130,29 @@ export const translations = {
     carHandoverConditions: "II. ПРИЕМАНЕ И ПРЕДАВАНЕ НА АВТОМОБИЛА",
     paymentMethod: "III. НАЧИН НА ПЛАЩАНЕ",
     lesseeRights: "IV. ПРАВА И ОТГОВОРНОСТИ НА НАЕМАТЕЛЯ",
-    additionalFeesInsurance: "V. ДОПЪЛНИТЕЛНИ ТАКСИ И ЗАСТРАХОВКА",
+    additionalFeesInsurance: "ДОПЪЛНИТЕЛНИ ТАКСИ И ОБОРУДВАНИЯ",
     otherGeneralTerms: "VI. ДРУГИ ОБЩИ УСЛОВИЯ",
     cancellationTerms: "УСЛОВИЯ ЗА АНУЛИРАНЕ/ПРОМЯНА НА РЕЗЕРВАЦИЯ",
 
+
     // Contacts
     contactsTitle: "Контакти",
+    contactsSubtitle: "Свържете се с нас за повече информация или резервация",
     contactInfo: "Информация за контакт",
     sendMessage: "Изпратете ни съобщение",
-    firstName: "Име",
-    lastName: "Фамилия",
+    name: "Име",
+    last: "Фамилия",
+    firstName: "Вашето име",
+    lastName: "Вашата фамилия",
+    emailContact: "Имейл",
+    emailContactPlaceholder: "Вашият имейл",
+    phoneContact: "Телефон",
+    phoneContactPlaceholder: "Вашият телефон",
     subject: "Тема",
+    subjectPlaceholder: "Тема на съобщението",
     message: "Съобщение",
     sendMessageBtn: "ИЗПРАТИ СЪОБЩЕНИЕ",
-    whyChooseDLRent: "Защо да изберете DL RENT?",
+    whyChooseDLRent: "Защо да изберете AUTO RENT?",
     newCars: "Нови автомобили",
     competitivePrices: "Конкурентни цени",
     fullInsurance: "Пълна застраховка",
@@ -124,7 +160,7 @@ export const translations = {
 
     // Cars page
     carsPageDescription:
-      "Автомобили от висок клас, предлагащи съчетание от комфорт, дизайн и мощност. Разгледайте моделите, които са налични. DL Rent Ви пожелава приятно и безаварийно пътуване.",
+      "Автомобили от висок клас, предлагащи съчетание от комфорт, дизайн и мощност. Разгледайте моделите, които са налични. AUTO RENT Ви пожелава приятно и безаварийно пътуване.",
     filter: "ФИЛТЪР",
     bodyType: "Купе",
     selectOption: "Изберете",
@@ -160,7 +196,6 @@ export const translations = {
     time: "Време:",
     numberOfDays: "Брой дни:",
     priceBreakdown: "Разбивка на цената",
-    pricePerDay: "Цена на ден:",
     total: "Общо:",
     needHelp: "Нужда от помощ?",
     pleaseAcceptTerms: "Моля, приемете общите условия",
@@ -177,7 +212,7 @@ export const translations = {
     businessOffers: "Бизнес предложения",
     fleet: "АВТОПАРК",
     contactsFooter: "КОНТАКТИ",
-    officeStaraZagora: "Офис Стара Загора",
+    officeStaraZagora: "Офис Слънчев бряг",
     footerDescription:
       "Ние предлагаме голям избор от автомобили под наем от различни категории, които обхващат най-различни нужди и потребности.",
 
@@ -209,13 +244,140 @@ export const translations = {
     childSeat: "Детско столче",
     gps: "GPS навигация",
     additionalDriver: "Допълнителен водач",
-    lateReturn: "Закъснение при връщане",
     perHour: "час",
     pricesInBGN: "Цените са в български лева и включват ДДС",
     depositInfo: "Депозитът се блокира на кредитна/дебитна карта при получаване на автомобила",
     minimumRental: "Минимален период на наем - 1 ден",
     weeklyDiscount: "При наем над 7 дни се прилагат специални отстъпки",
-    priceChangeNotice: "Цените могат да се променят без предварително уведомление"
+    priceChangeNotice: "Цените могат да се променят без предварително уведомление",
+    included: "Включени",
+
+    // Navigation
+    navigation: "Навигационно меню",
+
+    // Pricing periods
+    days1to3: "1-3 Дни",
+    days4to7: "4-7 Дни",
+    days8to14: "8-14 Дни",
+    days15plus: "15+ Дни",
+
+    // SEO and Meta
+    siteTitle: "AUTO Rent | Премиум автомобили под наем в България | Кратък и дългосрочен наем",
+    siteDescription: "AUTO Rent предлага премиум автомобили под наем в България. Голям избор от автомобили, гъвкави условия и конкурентни цени за кратък и дългосрочен наем.",
+    ogTitle: "AUTO Rent - Премиум автомобили под наем в България",
+    ogDescription: "Премиум автомобили под наем в България. Голям избор от автомобили за кратък и дългосрочен наем.",
+
+    // 404 Page
+    pageNotFound: "Страницата не е намерена",
+    pageNotFoundDescription: "Страницата, която търсите, не може да бъде намерена. Моля, проверете URL адреса или се върнете към началната страница.",
+    returnToHomepage: "Към началната страница",
+    oops: "Упс!",
+
+    // Car Names
+    shkodaOctavia: "ШКОДА ОКТАВИЯ",
+    rangeRover: "РЕЙНДЖ РОУВЪР",
+    opelInsignia: "ОПЕЛ ИНСИГНИЯ",
+    mercedesC220: "МЕРЦЕДЕС Ц220",
+    bmw3Series: "БМВ СЕРИЯ 3",
+
+    // Contact Details
+    officeAddress: "ул. Цар Симеон Велики 83",
+    officeEmail: "proauto@autorent.bg",
+
+    // Office Location
+    ourOffice: "Нашият офис",
+    sunnyBeachBulgaria: "Слънчев бряг, България",
+
+    // Customer Information
+    customerInformation: "Информация за клиента",
+    fullName: "Име и фамилия",
+    orderSummary: "Резюме на поръчката",
+    duration: "Продължителност",
+    creating: "Създаване...",
+    createReservation: "Създай резервация",
+
+    // Services page
+    additionalServicesAndPrices: "Допълнителни услуги и цени",
+    convenienceServices: "Услуги за удобство",
+    deliveryBlackSea: "Доставка в рамките на Черноморието",
+    deliveryOutsideBlackSea: "Доставка извън Черноморието",
+    returnOutsideWorkingHours: "Връщане извън работно време",
+    additionalEquipment: "Допълнително оборудване",
+    gpsNavigation: "GPS Навигация",
+
+    // How to Order Section
+    howToOrderService: "Как да поръчате услуга",
+    howToOrderDescription: "За да поръчате някоя от нашите услуги, моля свържете се с нас по телефона или изпратете заявка по email.",
+    deliveryTime: "Доставката се извършва в рамките на 2-4 часа",
+    emergencyService: "За спешни случаи - 24/7 обслужване",
+    advanceBooking: "Предварително резервиране препоръчително",
+    paymentOnDelivery: "Плащането се извършва при получаване",
+    workingHoursDetailed: "Пн-Пт 08:00-18:00, Сб 09:00-17:00",
+
+    // Car Details Page
+    carSpecifications: "Спецификации на автомобила",
+    currentLocation: "Текущо местоположение",
+    pricing: "Ценообразуване",
+    pricePerDayRange: "Цена на ден",
+    carFeatures: "Особености на автомобила",
+    priceIncludesFullCoverage: "Цената включва Пълно покритие",
+    noHiddenFees: "(няма добавени и скрити такси):",
+    makeReservation: "НАПРАВИ РЕЗЕРВАЦИЯ",
+    reservationDetails: "Детайли на резервацията",
+    pickupDetails: "Детайли за взимане",
+    returnDetails: "Детайли за връщане",
+    customerDetails: "Данни за клиента",
+    reservationSummary: "Обобщение на резервацията",
+    rentalPeriod: "Период на наемане",
+    totalAmount: "Обща сума",
+    processingReservation: "Обработка на резервацията...",
+    reservationSuccess: "Резервацията е успешна!",
+    reservationError: "Грешка при създаване на резервация",
+    tryAgain: "Моля, опитайте отново",
+    fillAllFields: "Моля, попълнете всички задължителни полета",
+    daysOfRental: "дни наем",
+
+    // Car Features and Equipment
+    parkingSensors: "Паркинг сензори",
+    climateControl: "Климатроник",
+    cruiseControl: "Круиз контрол",
+    leatherSeats: "Кожен салон",
+    bluetooth: "Bluetooth",
+    roadsideAssistance: "24/7 Пътна помощ",
+    freeCancellation: "Безплатна отмяна",
+
+    // Monthly Offers Page
+    significantDiscounts: "Значителни отстъпки при дългосрочни договори",
+    flexiblePaymentTerms: "Гъвкави условия за плащане",
+    fullMaintenanceIncluded: "Пълна поддръжка и сервиз включени",
+    carChangeOption: "Възможност за смяна на автомобила",
+    technicalSupport24_7: "24/7 техническа поддръжка",
+    minimumPeriod: "Минимален период - 3 месеца",
+    depositPayment: "Депозит се заплаща при подписване на договора",
+    monthlyPaymentInAdvance: "Месечното плащане се извършва авансово",
+    mileageExcess: "При надвишаване на пробега - 0.30 лв/км",
+    earlyTermination: "Възможност за предсрочно прекратяване",
+    workingHoursShort: "Пн-Пт 08:00-18:00",
+    personalizedOffer: "Нашият екип ще подготви персонализирана оферта според вашите нужди и изисквания. Предлагаме различни модели автомобили и гъвкави условия за дългосрочен наем.",
+    perMonth: "МЕСЕЦ",
+    kmLimit: "км",
+
+    // Car details section
+    engineType: "Двигател",
+    fuelConsumption: "Разход на гориво",
+    yearOfManufacture: "Година на производство",
+    viewDetails: "ВИЖ ПОВЕЧЕ",
+    location: "Локация",
+    failedToCheckAvailability: "Неуспешна проверка за наличност на автомобили",
+    errorOccurred: "Възникна грешка",
+    engine: "Двигател",
+    consumption: "Разход",
+    priceIncludes: "Цената включва",
+    //pricePerDay: "Цена на ден",
+    pricePerDayShort: "на ден",
+    carYear: "Година",
+    selectedDatesUnavailable: "Избраните дати не са налични",
+    checking: "Проверка..."
   },
   en: {
     // Header
@@ -233,6 +395,9 @@ export const translations = {
     seeMore: "SEE MORE",
     rent: "RENT",
     rental: "PICKUP",
+    bookNow: "BOOK NOW",
+    selectDate: "Select date",
+    allRightsReserved: "All rights reserved.",
     address: "Address",
     workingHours: "Working Hours",
     mondayFriday: "Monday - Friday: 08:00 - 18:00",
@@ -247,9 +412,11 @@ export const translations = {
     deposit: "DEPOSIT",
     mileageLimit: "MILEAGE UP TO 3000 KM/MONTH",
     priceForPeriod: "Price for period",
+    pricePerDay: "Price per day",
+    totalPrice: "Total",
 
     // Homepage
-    carsForRent: "Car Rental",
+    carsForRent: "CAR RENTAL",
     return: "RETURN",
     pickupLocation: "Pickup Location",
     returnLocation: "Return Location",
@@ -258,8 +425,8 @@ export const translations = {
     pickupTime: "Pickup Time",
     returnTime: "Return Time",
     search: "SEARCH",
-    ourCars: "Our Rental Cars",
-    perDay: "per day",
+    ourCars: "OUR RENTAL CARS",
+    perDay: "day",
     lightCars: "Cars",
     suvs: "SUVs",
     vans: "Vans",
@@ -280,10 +447,34 @@ export const translations = {
     compact: "Compact",
     suv: "SUV",
     sedan: "Sedan",
+    hatchback: "Hatchback",
+    coupe: "Coupe",
+    all: "All",
+    bodyType: "Body Type",
+    filter: "FILTER",
+    clearAllFilters: "Clear All",
 
     // About page
-    aboutTitle: "About Us",
-    aboutSubtitle: "Your reliable car rental partner in Bulgaria",
+    aboutTitle: "Who are we?",
+    aboutMainDescription: "AUTO RENT is a leading car rental company, offering reliable, convenient and transparent services for clients in Bulgaria. Our main mission is to provide comfortable, safe and hassle-free travel with quality vehicles, without hidden fees and with full comprehensive insurance included.",
+    officialRegistration: "Official Registration",
+    registrationInfo: "AUTO RENT is a company registered in the commercial register as:",
+    companyName: "AUTO RENT EOOD",
+    companyAddress: "Address: Sunny Beach",
+    ourLocations: "Our locations:",
+    deliveryToAddress: "Delivery to Address",
+    deliveryDescription: "Cars are delivered to an address, directly to your home or to the airport. This extra saves you from having to go to the location by taxi or public transport to get the car you want to rent.",
+    ourFleet: "Our Fleet",
+    fleetDescription: "The company has been developing its car rental business since the beginning of 2023. We offer new high-class cars. Our goal is to provide maximum comfort in choosing, road safety, pleasant atmosphere during long trips and all kinds of automotive convenience with the many extras our cars are equipped with. All cars are serviced only at authorized service centers, which guarantees the impeccable technical condition of all our vehicles.",
+    finalNote: "In our short experience in the industry, we can be proud that we have not had a single disappointed or dissatisfied client with our services. We excel at satisfying all the requirements and wishes of our clients, and we think we succeed.",
+    experienceSince2023: "Experience since 2023",
+    satisfiedClients: "100% satisfied clients",
+    newVehicles: "New vehicles",
+    professionalService: "Professional service",
+    aboutPageTitle: "About AUTO Rent | Premium Car Rental Company in Bulgaria",
+    aboutPageDescription: "Learn about AUTO Rent - Bulgaria's leading car rental company. New fleet, multiple locations, and exceptional service since 2023. 100% customer satisfaction guaranteed.",
+    aboutPageOgTitle: "About AUTO Rent - Premium Car Rental Company",
+    aboutPageOgDescription: "Leading car rental company in Bulgaria with new fleet and multiple locations. Professional service and 100% customer satisfaction.",
 
     // Services
     servicesTitle: "Services",
@@ -311,6 +502,7 @@ export const translations = {
     monthlyOffersTitle: "Long-term rentals",
     monthlyOffersSubtitle: "MONTHLY RENTAL OFFERS",
     contactForOffer: "FOR PERIODS 3+ MONTHS PLEASE CONTACT US FOR AN INDIVIDUAL OFFER*",
+    pricePeriod: "*The prices quoted do not apply for the period from 01.09 to 31.05.",
     longTermAdvantages: "Long-term rental advantages",
     longTermConditions: "Long-term rental conditions",
     contactForPersonalOffer: "Contact us for a personal offer",
@@ -321,32 +513,36 @@ export const translations = {
     carHandoverConditions: "II. CAR HANDOVER AND RETURN",
     paymentMethod: "III. PAYMENT METHOD",
     lesseeRights: "IV. LESSEE RIGHTS AND RESPONSIBILITIES",
-    additionalFeesInsurance: "V. ADDITIONAL FEES AND INSURANCE",
+    additionalFeesInsurance: "ADDITIONAL FEES AND SERVICES",
     otherGeneralTerms: "VI. OTHER GENERAL TERMS",
     cancellationTerms: "CANCELLATION/MODIFICATION TERMS",
 
     // Contacts
     contactsTitle: "Contacts",
+    contactsSubtitle: "Contact us for more information or reservation",
     contactInfo: "Contact Information",
     sendMessage: "Send us a message",
+    name: "Name",
+    last: "Last Name",
     firstName: "First Name",
     lastName: "Last Name",
+    emailContact: "Email",
+    emailContactPlaceholder: "Your email",
+    phoneContact: "Phone",
+    phoneContactPlaceholder: "Your phone",
     subject: "Subject",
+    subjectPlaceholder: "Subject of the message",
     message: "Message",
     sendMessageBtn: "SEND MESSAGE",
-    whyChooseDLRent: "Why choose DL RENT?",
+    whyChooseDLRent: "Why choose AUTO RENT?",
     newCars: "New cars",
     competitivePrices: "Competitive prices",
     fullInsurance: "Full insurance",
     support24_7: "24/7 support",
 
     // Cars page
-    carsPageDescription:
-      "High-class cars offering a combination of comfort, design and power. Browse the available models. DL Rent wishes you a pleasant and accident-free journey.",
-    filter: "FILTER",
-    bodyType: "Body Type",
+    carsPageDescription: "High-class cars offering a combination of comfort, design and power. Browse the available models. AUTO RENT wishes you a pleasant and accident-free journey.",
     selectOption: "Select",
-    clearAllFilters: "Clear All",
     showingCars: "Showing",
     ofCars: "of",
     carsForPeriod: "cars for the period",
@@ -378,7 +574,6 @@ export const translations = {
     time: "Time:",
     numberOfDays: "Number of days:",
     priceBreakdown: "Price Breakdown",
-    pricePerDay: "Price per day:",
     total: "Total:",
     needHelp: "Need help?",
     pleaseAcceptTerms: "Please accept the terms and conditions",
@@ -395,7 +590,7 @@ export const translations = {
     businessOffers: "Business Offers",
     fleet: "FLEET",
     contactsFooter: "CONTACTS",
-    officeStaraZagora: "Office Stara Zagora",
+    officeStaraZagora: "Office Sunny Beach",
     footerDescription:
       "We offer a wide selection of rental cars from different categories that cover a variety of needs and requirements.",
 
@@ -427,15 +622,142 @@ export const translations = {
     childSeat: "Child seat",
     gps: "GPS navigation",
     additionalDriver: "Additional driver",
-    lateReturn: "Late return",
     perHour: "hour",
     pricesInBGN: "Prices are in Bulgarian Leva and include VAT",
     depositInfo: "Deposit is blocked on credit/debit card when receiving the car",
     minimumRental: "Minimum rental period - 1 day",
     weeklyDiscount: "Special discounts apply for rentals over 7 days",
-    priceChangeNotice: "Prices may change without prior notice"
+    priceChangeNotice: "Prices may change without prior notice",
+    included: "Included",
+
+    // Navigation
+    navigation: "Navigation menu",
+
+    // Pricing periods
+    days1to3: "1-3 Days",
+    days4to7: "4-7 Days",
+    days8to14: "8-14 Days",
+    days15plus: "15+ Days",
+
+    // SEO and Meta
+    siteTitle: "AUTO Rent | Premium Car Rental in Bulgaria | Short and Long-term Rental",
+    siteDescription: "AUTO Rent offers premium car rentals in Bulgaria. Wide selection of vehicles, flexible terms, and competitive prices for short and long-term rental.",
+    ogTitle: "AUTO Rent - Premium Car Rental in Bulgaria",
+    ogDescription: "Premium car rental in Bulgaria. Wide selection of vehicles for short and long-term rental.",
+
+    // 404 Page
+    pageNotFound: "Page Not Found",
+    pageNotFoundDescription: "The page you are looking for cannot be found. Please check the URL or return to the homepage.",
+    returnToHomepage: "Return to Homepage",
+    oops: "Oops!",
+
+    // Car Names
+    shkodaOctavia: "SKODA OCTAVIA",
+    rangeRover: "RANGE ROVER",
+    opelInsignia: "OPEL INSIGNIA",
+    mercedesC220: "MERCEDES C220",
+    bmw3Series: "BMW 3 SERIES",
+
+    // Contact Details
+    officeAddress: "83 Tsar Simeon Veliki Str.",
+    officeEmail: "proauto@autorent.bg",
+
+    // Office Location
+    ourOffice: "Our Office",
+    sunnyBeachBulgaria: "Sunny Beach, Bulgaria",
+
+    // Customer Information
+    customerInformation: "Customer Information",
+    fullName: "Full Name",
+    orderSummary: "Order Summary",
+    duration: "Duration",
+    creating: "Creating...",
+    createReservation: "Create Reservation",
+
+    // Services page
+    additionalServicesAndPrices: "Additional Services and Prices",
+    convenienceServices: "Convenience Services",
+    deliveryBlackSea: "Delivery within Black Sea region",
+    deliveryOutsideBlackSea: "Delivery outside Black Sea region",
+    returnOutsideWorkingHours: "Return outside working hours",
+    additionalEquipment: "Additional Equipment",
+    gpsNavigation: "GPS Navigation",
+
+    // How to Order Section
+    howToOrderService: "How to Order a Service",
+    howToOrderDescription: "To order any of our services, please contact us by phone or send a request via email.",
+    deliveryTime: "Delivery is made within 2-4 hours",
+    emergencyService: "For emergencies - 24/7 service",
+    advanceBooking: "Advance booking recommended",
+    paymentOnDelivery: "Payment is made upon delivery",
+    workingHoursDetailed: "Mon-Fri 08:00-18:00, Sat 09:00-17:00",
+
+    // Car Details Page
+    carSpecifications: "Car Specifications",
+    currentLocation: "Current Location",
+    pricing: "Pricing",
+    pricePerDayRange: "Price per day",
+    carFeatures: "Car Features",
+    priceIncludesFullCoverage: "Price Includes Full Coverage",
+    noHiddenFees: "(no added or hidden fees):",
+    makeReservation: "MAKE RESERVATION",
+    reservationDetails: "Reservation Details",
+    pickupDetails: "Pickup Details",
+    returnDetails: "Return Details",
+    customerDetails: "Customer Details",
+    reservationSummary: "Reservation Summary",
+    rentalPeriod: "Rental Period",
+    totalAmount: "Total Amount",
+    processingReservation: "Processing Reservation...",
+    reservationSuccess: "Reservation Successful!",
+    reservationError: "Error Creating Reservation",
+    tryAgain: "Please try again",
+    fillAllFields: "Please fill in all required fields",
+    daysOfRental: "days rental",
+
+    // Car Features and Equipment
+    parkingSensors: "Parking Sensors",
+    climateControl: "Climate Control",
+    cruiseControl: "Cruise Control",
+    leatherSeats: "Leather Seats",
+    bluetooth: "Bluetooth",
+    roadsideAssistance: "24/7 Roadside Assistance",
+    freeCancellation: "Free Cancellation",
+
+    // Monthly Offers Page
+    significantDiscounts: "Significant discounts for long-term contracts",
+    flexiblePaymentTerms: "Flexible payment terms",
+    fullMaintenanceIncluded: "Full maintenance and service included",
+    carChangeOption: "Option to change vehicle",
+    technicalSupport24_7: "24/7 technical support",
+    minimumPeriod: "Minimum period - 3 months",
+    depositPayment: "Deposit is paid upon contract signing",
+    monthlyPaymentInAdvance: "Monthly payment is made in advance",
+    mileageExcess: "For mileage excess - 0.30 BGN/km",
+    earlyTermination: "Early termination option available",
+    workingHoursShort: "Mon-Fri 08:00-18:00",
+    personalizedOffer: "Our team will prepare a personalized offer according to your needs and requirements. We offer various car models and flexible conditions for long-term rental.",
+    perMonth: "MONTH",
+    kmLimit: "km",
+
+    // Car details section
+    engineType: "Engine",
+    fuelConsumption: "Fuel Consumption",
+    yearOfManufacture: "Year of Manufacture",
+    viewDetails: "VIEW DETAILS",
+    location: "Location",
+    failedToCheckAvailability: "Failed to check car availability",
+    errorOccurred: "An error occurred",
+    engine: "Engine",
+    consumption: "Consumption",
+    priceIncludes: "Price Includes",
+    //pricePerDay: "Price per day",
+    pricePerDayShort: "per day",
+    carYear: "Year",
+    selectedDatesUnavailable: "Selected dates are unavailable",
+    checking: "Checking..."
   }
-}
+} as const
 
 export type Language = keyof typeof translations
-export type TranslationKey = keyof typeof translations.bg
+export type TranslationKey = keyof (typeof translations)["en"]

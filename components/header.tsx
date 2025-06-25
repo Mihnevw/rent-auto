@@ -16,42 +16,39 @@ import { type TranslationKey } from "@/lib/translations"
 export function Header() {
   const { language, setLanguage, t } = useLanguage()
   const [isOpen, setIsOpen] = useState(false)
-  const [prevScrollPos, setPrevScrollPos] = useState(0)
   const [visible, setVisible] = useState(true)
-  const [scrollDirection, setScrollDirection] = useState("up")
+  const [lastScrollY, setLastScrollY] = useState(0)
 
   useEffect(() => {
-    let lastScrollY = window.scrollY
-    let ticking = false
-
-    const updateScrollDirection = () => {
-      const scrollY = window.scrollY
-      const direction = scrollY > lastScrollY ? "down" : "up"
+    const controlNavbar = () => {
+      const currentScrollY = window.scrollY
       
-      if (direction !== scrollDirection && Math.abs(scrollY - lastScrollY) > 10) {
-        setScrollDirection(direction)
-        setVisible(direction === "up")
-      }
-      
-      lastScrollY = scrollY > 0 ? scrollY : 0
-      ticking = false
-    }
-
-    const onScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(updateScrollDirection)
-        ticking = true
+      // Show navbar at the top
+      if (currentScrollY < 20) {
+        setVisible(true)
+        setLastScrollY(currentScrollY)
+        return
       }
 
-      // Always show header at the top of the page
-      if (window.scrollY < 50) {
+      // Determine scroll direction and update visibility
+      if (currentScrollY > lastScrollY) {
+        // Scrolling down
+        setVisible(false)
+      } else {
+        // Scrolling up
         setVisible(true)
       }
+      
+      setLastScrollY(currentScrollY)
     }
 
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
-  }, [scrollDirection])
+    window.addEventListener('scroll', controlNavbar)
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('scroll', controlNavbar)
+    }
+  }, [lastScrollY])
 
   const navigationLinks: Array<{ href: string; label: TranslationKey }> = [
     { href: "/", label: "home" },
@@ -65,7 +62,7 @@ export function Header() {
 
   return (
     <header 
-      className={`bg-white shadow-sm sticky top-0 z-50 transition-transform duration-300 ${
+      className={`fixed w-full top-0 left-0 right-0 bg-white shadow-sm z-50 transition-transform duration-200 ease-in-out ${
         visible ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
@@ -105,7 +102,12 @@ export function Header() {
         <div className="flex items-center gap-2 sm:gap-4">
           <div className="hidden md:flex items-center gap-2 text-sm">
             <Phone className="w-4 h-4" />
-            <span className="font-semibold">+359 898636246</span>
+            <a 
+              href="tel:+359894818283" 
+              className="font-semibold hover:text-orange-400 transition-colors"
+            >
+              +359 894818283
+            </a>
           </div>
 
           {/* Language Selector Dropdown */}
@@ -172,7 +174,7 @@ export function Header() {
                 <Menu className="w-6 h-6" />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px] p-0">
+            <SheetContent side="right" className="w-[300px] sm:w-[400px] p-0" title={t("navigation")}>
               <div className="flex flex-col h-full">
                 <div className="p-4 border-b">
                   <div className="flex items-center gap-2">
@@ -202,7 +204,12 @@ export function Header() {
                 <div className="p-4 border-t">
                   <div className="flex items-center gap-2 justify-center">
                     <Phone className="w-5 h-5 text-green-500" />
-                    <span className="font-semibold">+359 898636246</span>
+                    <a 
+                      href="tel:+359894818283" 
+                      className="font-semibold hover:text-green-500 transition-colors"
+                    >
+                      +359 894818283
+                    </a>
                   </div>
                 </div>
               </div>

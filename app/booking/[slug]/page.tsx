@@ -464,7 +464,7 @@ export default function BookingPage({ params }: BookingPageProps) {
                       <span>{calculateDays().toString()}</span>
                     </div>
                     <div className="flex justify-between border-t pt-2 font-bold text-lg">
-                      <span>{t("total")}:</span>
+                      <span>{t("totalPrice")}:</span>
                       <span className="text-blue-600">{formatPrice(totalPrice.toString())}</span>
                     </div>
                   </div>
