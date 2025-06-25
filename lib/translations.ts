@@ -243,7 +243,7 @@ export const translations = {
     perKm: "лв./км",
     childSeat: "Детско столче",
     gps: "GPS навигация",
-    additionalDriver: "Допълнителен водач",
+    additionalDriver: "Допълнителен шофьор",
     perHour: "час",
     pricesInBGN: "Цените са в български лева и включват ДДС",
     depositInfo: "Депозитът се блокира на кредитна/дебитна карта при получаване на автомобила",
@@ -334,7 +334,7 @@ export const translations = {
     reservationSuccess: "Резервацията е успешна!",
     reservationError: "Грешка при създаване на резервация",
     tryAgain: "Моля, опитайте отново",
-    fillAllFields: "Моля, попълнете всички задължителни полета",
+    fillAllFields: "Моля, попълнете всички полета",
     daysOfRental: "дни наем",
 
     // Car Features and Equipment
@@ -368,7 +368,7 @@ export const translations = {
     yearOfManufacture: "Година на производство",
     viewDetails: "ВИЖ ПОВЕЧЕ",
     location: "Локация",
-    failedToCheckAvailability: "Неуспешна проверка за наличност на автомобили",
+    failedToCheckAvailability: "Неуспешна проверка за наличност",
     errorOccurred: "Възникна грешка",
     engine: "Двигател",
     consumption: "Разход",
@@ -377,7 +377,34 @@ export const translations = {
     pricePerDayShort: "на ден",
     carYear: "Година",
     selectedDatesUnavailable: "Избраните дати не са налични",
-    checking: "Проверка..."
+    checking: "Проверка...",
+    fullyBooked: "Напълно заета",
+    partiallyAvailable: "Частично свободна",
+    fullyAvailable: "Напълно свободна",
+    errorFetchingLocations: "Грешка при зареждане на локациите",
+    missingSearchParameters: "Моля, въведете всички параметри за търсене",
+    failedToFetchCars: "Грешка при зареждане на автомобилите",
+    tryDifferentDates: "Опитайте с различни дати",
+
+    // Additional Services
+    additionalServices: "Допълнителни услуги",
+    free: "Безплатно",
+    priceStartsFrom: "Цена от",
+    detailsForRental: "Детайли за наемане",
+
+    // Contact form translations
+    enterFullName: "Въведете вашето име и фамилия",
+    enterEmail: "Въведете вашия имейл",
+    enterPhone: "Въведете вашия телефон",
+    nameRequired: "Името е задължително",
+    emailRequired: "Имейлът е задължителен",
+    invalidEmail: "Моля, въведете валиден имейл адрес",
+    phoneRequired: "Телефонният номер е задължителен",
+    invalidPhone: "Моля, въведете валиден телефонен номер",
+    bookingDetails: "Детайли за резервацията",
+
+    // Error messages
+    failedToCreateReservation: "Неуспешно създаване на резервация"
   },
   en: {
     // Header
@@ -394,7 +421,7 @@ export const translations = {
     loading: "Loading...",
     seeMore: "SEE MORE",
     rent: "RENT",
-    rental: "PICKUP",
+    rental: "RENTAL",
     bookNow: "BOOK NOW",
     selectDate: "Select date",
     allRightsReserved: "All rights reserved.",
@@ -619,7 +646,7 @@ export const translations = {
     deliveryInCity: "Delivery in Plovdiv",
     deliveryOutsideCity: "Delivery outside Plovdiv",
     perKm: "BGN/km",
-    childSeat: "Child seat",
+    childSeat: "Child Seat",
     gps: "GPS navigation",
     additionalDriver: "Additional driver",
     perHour: "hour",
@@ -712,7 +739,7 @@ export const translations = {
     reservationSuccess: "Reservation Successful!",
     reservationError: "Error Creating Reservation",
     tryAgain: "Please try again",
-    fillAllFields: "Please fill in all required fields",
+    fillAllFields: "Please fill in all fields",
     daysOfRental: "days rental",
 
     // Car Features and Equipment
@@ -746,7 +773,7 @@ export const translations = {
     yearOfManufacture: "Year of Manufacture",
     viewDetails: "VIEW DETAILS",
     location: "Location",
-    failedToCheckAvailability: "Failed to check car availability",
+    failedToCheckAvailability: "Failed to check availability",
     errorOccurred: "An error occurred",
     engine: "Engine",
     consumption: "Consumption",
@@ -755,7 +782,31 @@ export const translations = {
     pricePerDayShort: "per day",
     carYear: "Year",
     selectedDatesUnavailable: "Selected dates are unavailable",
-    checking: "Checking..."
+    checking: "Checking...",
+    fullyBooked: "Fully Booked",
+    partiallyAvailable: "Partially Available",
+    fullyAvailable: "Fully Available",
+    errorFetchingLocations: "Error loading locations",
+    missingSearchParameters: "Please enter all search parameters",
+    failedToFetchCars: "Failed to fetch cars",
+    tryDifferentDates: "Try different dates",
+
+    // Additional Services
+    additionalServices: "Additional Services",
+    free: "Free",
+    priceStartsFrom: "Price from",
+    detailsForRental: "Rental Details",
+
+    // Contact form translations
+    enterFullName: "Enter your full name",
+    enterEmail: "Enter your email",
+    enterPhone: "Enter your phone number",
+    nameRequired: "Name is required",
+    emailRequired: "Email is required",
+    invalidEmail: "Please enter a valid email address",
+    phoneRequired: "Phone number is required",
+    invalidPhone: "Please enter a valid phone number",
+    bookingDetails: "Booking Details",
   }
 } as const
 

@@ -13,7 +13,7 @@ import { useLanguage } from "@/lib/language-context"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { format, isBefore, startOfToday } from "date-fns"
-import { cn } from "@/lib/utils"
+import { cn, STORAGE_KEYS, saveToStorage, getFromStorage } from "@/lib/utils"
 import { FooterSection } from "@/components/sections/footer-section"
 
 interface Location {
@@ -188,6 +188,53 @@ export default function CarsPage() {
 
   const { t, formatPrice } = useLanguage()
 
+  // Load saved data from localStorage
+  useEffect(() => {
+    const savedPickupDate = getFromStorage(STORAGE_KEYS.PICKUP_DATE)
+    const savedPickupTime = getFromStorage(STORAGE_KEYS.PICKUP_TIME)
+    const savedReturnDate = getFromStorage(STORAGE_KEYS.RETURN_DATE)
+    const savedReturnTime = getFromStorage(STORAGE_KEYS.RETURN_TIME)
+    const savedPickupLocation = getFromStorage(STORAGE_KEYS.PICKUP_LOCATION)
+    const savedReturnLocation = getFromStorage(STORAGE_KEYS.RETURN_LOCATION)
+
+    if (savedPickupDate) setPickupDate(new Date(savedPickupDate))
+    if (savedPickupTime) setPickupTime(savedPickupTime)
+    if (savedReturnDate) setReturnDate(new Date(savedReturnDate))
+    if (savedReturnTime) setReturnTime(savedReturnTime)
+    if (savedPickupLocation) setPickupLocation(savedPickupLocation)
+    if (savedReturnLocation) setReturnLocation(savedReturnLocation)
+  }, [])
+
+  // Save dates and times to localStorage when they change
+  useEffect(() => {
+    if (pickupDate) saveToStorage(STORAGE_KEYS.PICKUP_DATE, pickupDate.toISOString())
+    saveToStorage(STORAGE_KEYS.PICKUP_TIME, pickupTime)
+  }, [pickupDate, pickupTime])
+
+  useEffect(() => {
+    if (returnDate) saveToStorage(STORAGE_KEYS.RETURN_DATE, returnDate.toISOString())
+    saveToStorage(STORAGE_KEYS.RETURN_TIME, returnTime)
+  }, [returnDate, returnTime])
+
+  // Save locations to localStorage when they change
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.PICKUP_LOCATION, pickupLocation)
+  }, [pickupLocation])
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.RETURN_LOCATION, returnLocation)
+  }, [returnLocation])
+
+  // Custom location setters
+  const handlePickupLocationChange = (value: string) => {
+    setPickupLocation(value)
+    // If return location is not set, set it to the same as pickup
+    if (!returnLocation) {
+      setReturnLocation(value)
+      saveToStorage(STORAGE_KEYS.RETURN_LOCATION, value)
+    }
+  }
+
   const fetchAvailableCars = async () => {
     setIsLoading(true)
     setError(null)
@@ -230,7 +277,12 @@ export default function CarsPage() {
       }
       
       const data = await response.json()
-      setCars(data.cars)
+      // Transform the cars data to ensure _id is present
+      const transformedCars = data.cars.map((car: { id?: string; _id?: string } & Omit<CarType, '_id'>) => ({
+        ...car,
+        _id: car._id || car.id // Use _id if present, otherwise use id
+      }))
+      setCars(transformedCars)
     } catch (err) {
       console.error('Error fetching cars:', err)
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -263,6 +315,7 @@ export default function CarsPage() {
     setPickupDate(date)
     if (date && returnDate && isBefore(returnDate, date)) {
       setReturnDate(undefined)
+      saveToStorage(STORAGE_KEYS.RETURN_DATE, null)
     }
   }
 
@@ -293,6 +346,25 @@ export default function CarsPage() {
     }))
   }
 
+  // Calendar modifiers
+  const modifiers = {
+    past: (date: Date) => isBefore(date, startOfToday())
+  }
+
+  // Calendar modifier styles
+  const modifiersStyles = {
+    past: {
+      color: 'white',
+      backgroundColor: 'rgba(107, 114, 128, 0.8)',
+      textDecoration: 'line-through'
+    }
+  }
+
+  // Calendar class names
+  const modifiersClassNames = {
+    past: 'text-white bg-gray-500 line-through'
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -321,9 +393,9 @@ export default function CarsPage() {
                 <div className="space-y-4">
                   <div>
                     <Label className="text-sm text-gray-600 mb-2 block">{t("pickupLocation")}</Label>
-                    <Select value={pickupLocation} onValueChange={setPickupLocation}>
+                    <Select value={pickupLocation} onValueChange={handlePickupLocationChange}>
                       <SelectTrigger className="w-full h-12 rounded-lg border-gray-200 text-gray-500">
-                        <SelectValue placeholder={isLoading ? "Loading..." : t("selectCity")} />
+                        <SelectValue placeholder={isLoading ? t("loading") : t("selectCity")} />
                       </SelectTrigger>
                       <SelectContent className="max-h-[300px]">
                         {locations.filter(loc => loc.isActive).map((location) => (
@@ -337,31 +409,34 @@ export default function CarsPage() {
 
                   {/* Pickup Date and Time */}
                   <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <Label className="text-sm text-gray-600 mb-2 block">{t("pickupDate")}</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
+                  <div>
+                    <Label className="text-sm text-gray-600 mb-2 block">{t("pickupDate")}</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
                             variant="outline"
-                            className={cn(
+                          className={cn(
                               "w-full h-12 justify-start text-left font-normal rounded-lg border-gray-200",
                               !pickupDate && "text-gray-500"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
                             {pickupDate ? format(pickupDate, "dd.MM.yyyy") : <span>{t("selectDate")}</span>}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={pickupDate}
-                            onSelect={handlePickupDateChange}
-                            disabled={isDateDisabled}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={pickupDate}
+                          onSelect={handlePickupDateChange}
+                          disabled={isDateDisabled}
+                            modifiers={modifiers}
+                            modifiersStyles={modifiersStyles}
+                            modifiersClassNames={modifiersClassNames}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                     </div>
                     <TimeInput
                       value={pickupTime}
@@ -396,32 +471,35 @@ export default function CarsPage() {
 
                   {/* Return Date and Time */}
                   <div className="grid grid-cols-1 gap-4">
-                    <div>
-                      <Label className="text-sm text-gray-600 mb-2 block">{t("returnDate")}</Label>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
+                  <div>
+                    <Label className="text-sm text-gray-600 mb-2 block">{t("returnDate")}</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
                             variant="outline"
-                            className={cn(
+                          className={cn(
                               "w-full h-12 justify-start text-left font-normal rounded-lg border-gray-200",
                               !returnDate && "text-gray-500"
-                            )}
-                          >
-                            <CalendarIcon className="mr-2 h-4 w-4" />
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
                             {returnDate ? format(returnDate, "dd.MM.yyyy") : <span>{t("selectDate")}</span>}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={returnDate}
-                            onSelect={setReturnDate}
-                            disabled={(date) => isDateDisabled(date) || (pickupDate ? isBefore(date, pickupDate) : false)}
-                            initialFocus
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={returnDate}
+                          onSelect={setReturnDate}
+                          disabled={(date) => isDateDisabled(date) || (pickupDate ? isBefore(date, pickupDate) : false)}
+                            modifiers={modifiers}
+                            modifiersStyles={modifiersStyles}
+                            modifiersClassNames={modifiersClassNames}
+                          initialFocus
                             fromDate={pickupDate}
-                          />
-                        </PopoverContent>
-                      </Popover>
+                        />
+                      </PopoverContent>
+                    </Popover>
                     </div>
                     <TimeInput
                       value={returnTime}
@@ -438,7 +516,7 @@ export default function CarsPage() {
                 onClick={fetchAvailableCars}
               >
                 {isLoading ? t("loading") : t("search")}
-              </Button>
+                </Button>
 
               {error && (
                 <div className="mb-6 p-4 bg-red-50 text-red-600 rounded-lg">
@@ -521,11 +599,11 @@ export default function CarsPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">{t("all")}</SelectItem>
-                      <SelectItem value="sedan">{t("sedan")}</SelectItem>
-                      <SelectItem value="hatchback">{t("hatchback")}</SelectItem>
-                      <SelectItem value="suv">{t("suv")}</SelectItem>
-                      <SelectItem value="coupe">{t("coupe")}</SelectItem>
+                      <SelectItem key="all" value="all">{t("all")}</SelectItem>
+                      <SelectItem key="sedan" value="sedan">{t("sedan")}</SelectItem>
+                      <SelectItem key="hatchback" value="hatchback">{t("hatchback")}</SelectItem>
+                      <SelectItem key="suv" value="suv">{t("suv")}</SelectItem>
+                      <SelectItem key="coupe" value="coupe">{t("coupe")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

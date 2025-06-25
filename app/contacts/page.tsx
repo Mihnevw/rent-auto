@@ -120,7 +120,7 @@ export default function ContactsPage() {
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Contact Information */}
             <section aria-label="Contact Information" className="space-y-6">
-              <Card>  
+              <Card>
                 <CardHeader>
                   <CardTitle className="text-2xl text-blue-600">{t("contactInfo")}</CardTitle>
                 </CardHeader>

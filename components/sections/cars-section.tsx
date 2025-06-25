@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Settings, Car, Fuel, DoorOpen } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
 import { type TranslationKey } from "@/lib/translations"
+import { buildApiUrl, config } from '@/lib/config'
+import { RentalForm } from "@/components/ui/rental-form"
 
 interface Location {
   _id: string
@@ -53,7 +55,7 @@ export function CarsSection() {
   useEffect(() => {
     const fetchCars = async () => {
       try {
-        const response = await fetch('http://localhost:8800/cars')
+        const response = await fetch(buildApiUrl(config.api.endpoints.cars))
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`)
         }

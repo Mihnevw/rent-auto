@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useLanguage } from "@/lib/language-context"
 import { CustomPagination } from "@/components/ui/custom-pagination"
+import { buildApiUrl, config } from '@/lib/config'
 
 interface Car {
   _id: string
+  id?: string  // Add optional id field to handle API responses that might use id instead of _id
   make: string
   model: string
   name: string
@@ -66,6 +68,8 @@ export default function SearchPage() {
   useEffect(() => {
     const fetchCars = async () => {
       setLoading(true)
+      setError(null)
+      
       try {
         const pickup = searchParams.get("pickup") || ""
         const returnLoc = searchParams.get("return") || ""
@@ -74,30 +78,49 @@ export default function SearchPage() {
         const pickupTime = searchParams.get("pickupTime") || ""
         const returnTime = searchParams.get("returnTime") || ""
 
+        // Validate required parameters
+        if (!pickup || !returnLoc || !pickupDate || !returnDate || !pickupTime || !returnTime) {
+          throw new Error(t("missingSearchParameters"))
+        }
+
         // Format dates to ISO 8601
-        const pickupDateTime = new Date(
-          `${pickupDate}T${pickupTime}`
-        ).toISOString()
+        const pickupDateTime = new Date(`${pickupDate}T${pickupTime}`).toISOString()
+        const returnDateTime = new Date(`${returnDate}T${returnTime}`).toISOString()
 
-        const returnDateTime = new Date(
-          `${returnDate}T${returnTime}`
-        ).toISOString()
-
-        const queryParams = new URLSearchParams({
+        const params = {
           pickupTime: pickupDateTime,
           returnTime: returnDateTime,
           pickupLocation: pickup,
           returnLocation: returnLoc
-        })
+        }
 
-        const response = await fetch(`http://localhost:8800/reservations/cars/available?${queryParams.toString()}`)
+        const response = await fetch(buildApiUrl(config.api.endpoints.availableCars, params))
         if (!response.ok) {
           const errorData = await response.json()
-          throw new Error(errorData.error || "Failed to fetch cars")
+          throw new Error(errorData.error || t("failedToFetchCars"))
         }
         
         const data: SearchResponse = await response.json()
-        setCars(data.cars)
+        console.log("API Response:", data)
+        
+        // Ensure cars data is valid
+        if (!data || !Array.isArray(data.cars)) {
+          throw new Error("Invalid API response format")
+        }
+        
+        // Map and validate the response
+        const validCars = data.cars
+          .map(car => {
+            const carId = car._id || car.id
+            if (typeof carId !== 'string') return null
+            return {
+              ...car,
+              _id: carId
+            }
+          })
+          .filter((car): car is Car => car !== null)
+        
+        setCars(validCars)
         setBookingDetails({
           pickup,
           return: returnLoc,
@@ -107,21 +130,25 @@ export default function SearchPage() {
           returnTime,
         })
       } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred")
+        console.error('Search error:', err)
+        setError(err instanceof Error ? err.message : t("errorOccurred"))
       } finally {
         setLoading(false)
       }
     }
 
     fetchCars()
-  }, [searchParams])
+  }, [searchParams, t])
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex items-center justify-center h-[calc(100vh-80px)]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-400 mx-auto"></div>
           <p className="mt-4 text-gray-600">{t("loading")}</p>
+          </div>
         </div>
       </div>
     )
@@ -132,22 +159,24 @@ export default function SearchPage() {
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="max-w-6xl mx-auto px-4 py-8">
-          <div className="text-center text-red-600">
-            <p>{error}</p>
+          <div className="text-center">
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-red-600">{error}</p>
+            </div>
           </div>
         </div>
       </div>
     )
   }
 
-  if (cars.length === 0) {
+  if (!cars.length) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">{t("noAvailableCars")}</h2>
-            <p className="text-gray-600">{t("changeFilters")}</p>
+            <p className="text-gray-600">{t("tryDifferentDates")}</p>
           </div>
         </div>
       </div>
@@ -167,18 +196,32 @@ export default function SearchPage() {
         </p>
 
         <div className="grid gap-6">
-          {cars.map((car) => (
+          {cars.map((car) => {
+            // Generate unique IDs for nested features and includes
+            const carFeatures = car.features?.map((feature, index) => ({
+              id: `${car._id}-feature-${index}`,
+              text: feature
+            })) || []
+
+            const carIncludes = car.priceIncludes?.map((item, index) => ({
+              id: `${car._id}-include-${index}`,
+              text: item
+            })) || []
+
+            return (
             <Card key={car._id} className="p-6">
               <div className="grid md:grid-cols-4 gap-6 items-center">
                 {/* Car Image */}
                 <div className="md:col-span-1">
+                    <div className="relative h-40">
                   <Image
-                    src={`http://localhost:8800${car.mainImage}` || "/placeholder.svg"}
+                        src={car.mainImage ? `http://localhost:8800${car.mainImage}` : "/placeholder.svg"}
                     alt={car.name}
-                    width={300}
-                    height={200}
-                    className="w-full h-40 object-contain"
+                        fill
+                        className="object-contain"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
+                    </div>
                 </div>
 
                 {/* Car Details */}
@@ -186,74 +229,80 @@ export default function SearchPage() {
                   <h3 className="text-xl font-bold text-blue-600 mb-2">{car.name}</h3>
                   <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
                     <div className="flex items-center gap-2">
-                      <span>• {t("engine")}: {car.engine}</span>
+                        <span>• {t("engine")}: {car.engine}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span>• {t("transmission")}: {car.transmission === "automatic" ? t("automatic") : t("manual")}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span>• {t("seats")}: {car.seats}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span>• {t("transmission")}: {car.transmission}</span>
+                        <span>• {t("doors")}: {car.doors}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span>• {t("seats")}: {car.seats}</span>
+                        <span>• {t("consumption")}: {car.consumption}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span>• {t("doors")}: {car.doors}</span>
+                        <span>• {t("carYear")}: {car.year}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span>• {t("consumption")}: {car.consumption}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span>• {t("carYear")}: {car.year}</span>
-                    </div>
-                  </div>
-                  
-                  {/* Features */}
-                  {car.features && (
+                    
+                    {/* Features */}
+                    {carFeatures.length > 0 && (
                     <div className="mt-4 flex gap-2 flex-wrap">
-                      {car.features.slice(0, 6).map((feature, index) => (
+                        {carFeatures.slice(0, 6).map((feature) => (
                         <span
-                          key={index}
+                            key={feature.id}
                           className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-semibold"
                         >
-                          {feature}
+                            {feature.text}
                         </span>
                       ))}
                     </div>
                   )}
 
-                  {/* Price Includes */}
-                  <div className="mt-2 text-sm text-gray-600">
-                    <span className="font-semibold">{t("priceIncludes")}:</span>
-                    <span className="ml-1">{car.priceIncludes.slice(0, 3).join(", ")}</span>
-                  </div>
+                    {/* Price Includes */}
+                    {carIncludes.length > 0 && (
+                      <div className="mt-2 text-sm text-gray-600">
+                        <span className="font-semibold">{t("priceIncludes")}:</span>
+                        <span className="ml-1">
+                          {carIncludes.slice(0, 3).map(item => item.text).join(", ")}
+                        </span>
+                      </div>
+                    )}
 
-                  {/* Location */}
-                  <div className="mt-2 text-sm text-gray-600">
-                    <span className="font-semibold">{t("location")}:</span>
-                    <span className="ml-1">{car.currentLocation.name}, {car.currentLocation.city}</span>
-                  </div>
+                    {/* Location */}
+                    {car.currentLocation && (
+                      <div className="mt-2 text-sm text-gray-600">
+                        <span className="font-semibold">{t("location")}:</span>
+                        <span className="ml-1">{car.currentLocation.name}, {car.currentLocation.city}</span>
+                      </div>
+                    )}
                 </div>
 
-                {/* Price and Rent Button */}
-                <div className="md:col-span-1 text-right">
-                  <div className="mb-4">
-                    <div className="text-sm text-gray-600">{t("priceForPeriod")}</div>
-                    <div className="text-2xl font-bold text-blue-600">
-                      {formatPrice(car.pricing["1_3"])}
+                  {/* Price and Book Button */}
+                  <div className="md:col-span-1 flex flex-col items-end justify-between">
+                    <div className="text-right mb-4">
+                      <p className="text-sm text-gray-600">{t("priceStartsFrom")}</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {formatPrice(car.pricing["1_3"].toString())}
+                        <span className="text-sm font-normal text-gray-600">/{t("pricePerDay")}</span>
+                      </p>
                     </div>
-                    <div className="text-xs text-gray-500">{t("pricePerDay")}</div>
-                  </div>
                   <Button
-                    className="bg-gradient-to-r from-blue-500 to-green-500 text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-green-600 transition-all duration-300 font-semibold px-6 py-2 rounded-xl"
-                    onClick={() => {
-                      const params = new URLSearchParams(searchParams.toString())
-                      window.location.href = `/cars/${car._id}?${params.toString()}`
-                    }}
-                  >
-                    {t("rent")}
+                      asChild
+                      className="w-full md:w-auto bg-orange-400 hover:bg-orange-500"
+                    >
+                      <a href={`/cars/${car._id}?fromDate=${bookingDetails.pickupDate}&fromTime=${bookingDetails.pickupTime}&toDate=${bookingDetails.returnDate}&toTime=${bookingDetails.returnTime}`}>
+                        {t("bookNow")}
+                      </a>
                   </Button>
                 </div>
               </div>
             </Card>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>

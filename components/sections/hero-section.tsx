@@ -11,11 +11,12 @@ import { useRouter } from "next/navigation"
 import { format, isBefore, startOfToday, addDays, isWithinInterval, parseISO } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+import { cn, STORAGE_KEYS, saveToStorage, getFromStorage } from "@/lib/utils"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import Autoplay from "embla-carousel-autoplay"
 import { type TranslationKey } from "@/lib/translations"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { buildApiUrl, config } from '@/lib/config'
 
 interface Location {
   _id: string
@@ -34,6 +35,12 @@ interface Reservation {
 interface BookedDates {
   start: string;
   end: string;
+}
+
+interface AvailabilityStatus {
+  date: string;
+  status: 'fully-booked' | 'partially-available' | 'available';
+  availableHours?: string[];
 }
 
 // Featured cars data
@@ -184,25 +191,68 @@ export function HeroSection() {
   const [locations, setLocations] = useState<Location[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [unavailableDates, setUnavailableDates] = useState<Date[]>([])
   const router = useRouter()
   const { t } = useLanguage()
-  const [existingReservations, setExistingReservations] = useState<Reservation[]>([])
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false)
-  const [bookedDates, setBookedDates] = useState<BookedDates[]>([])
-  const [selectedCarId, setSelectedCarId] = useState<string>("")
 
+  // Load saved data from localStorage
+  useEffect(() => {
+    const savedPickupDate = getFromStorage(STORAGE_KEYS.PICKUP_DATE)
+    const savedPickupTime = getFromStorage(STORAGE_KEYS.PICKUP_TIME)
+    const savedReturnDate = getFromStorage(STORAGE_KEYS.RETURN_DATE)
+    const savedReturnTime = getFromStorage(STORAGE_KEYS.RETURN_TIME)
+    const savedPickupLocation = getFromStorage(STORAGE_KEYS.PICKUP_LOCATION)
+    const savedReturnLocation = getFromStorage(STORAGE_KEYS.RETURN_LOCATION)
+
+    if (savedPickupDate) setPickupDate(new Date(savedPickupDate))
+    if (savedPickupTime) setPickupTime(savedPickupTime)
+    if (savedReturnDate) setReturnDate(new Date(savedReturnDate))
+    if (savedReturnTime) setReturnTime(savedReturnTime)
+    if (savedPickupLocation) setPickupLocation(savedPickupLocation)
+    if (savedReturnLocation) setReturnLocation(savedReturnLocation)
+  }, [])
+
+  // Save dates and times to localStorage when they change
+  useEffect(() => {
+    if (pickupDate) saveToStorage(STORAGE_KEYS.PICKUP_DATE, pickupDate.toISOString())
+    saveToStorage(STORAGE_KEYS.PICKUP_TIME, pickupTime)
+  }, [pickupDate, pickupTime])
+
+  useEffect(() => {
+    if (returnDate) saveToStorage(STORAGE_KEYS.RETURN_DATE, returnDate.toISOString())
+    saveToStorage(STORAGE_KEYS.RETURN_TIME, returnTime)
+  }, [returnDate, returnTime])
+
+  // Save locations to localStorage when they change
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.PICKUP_LOCATION, pickupLocation)
+  }, [pickupLocation])
+
+  useEffect(() => {
+    saveToStorage(STORAGE_KEYS.RETURN_LOCATION, returnLocation)
+  }, [returnLocation])
+
+  // Custom location setters
+  const handlePickupLocationChange = (value: string) => {
+    setPickupLocation(value)
+    // If return location is not set, set it to the same as pickup
+    if (!returnLocation) {
+      setReturnLocation(value)
+      saveToStorage(STORAGE_KEYS.RETURN_LOCATION, value)
+    }
+  }
+
+  // Fetch locations on component mount
   useEffect(() => {
     const fetchLocations = async () => {
       try {
-        const response = await fetch('http://localhost:8800/locations')
-        if (!response.ok) {
-          throw new Error('Failed to fetch locations')
-        }
+        const response = await fetch(buildApiUrl(config.api.endpoints.locations))
+        if (!response.ok) throw new Error('Failed to fetch locations')
         const data = await response.json()
         setLocations(data)
       } catch (error) {
         console.error('Error fetching locations:', error)
+        setError(t("errorFetchingLocations"))
       } finally {
         setIsLoading(false)
       }
@@ -211,75 +261,18 @@ export function HeroSection() {
     fetchLocations()
   }, [])
 
-  // Fetch existing reservations when location changes
-  useEffect(() => {
-    const fetchReservations = async () => {
-      if (!pickupLocation) return
-
-      try {
-        const response = await fetch(`http://localhost:8800/reservations?locationId=${pickupLocation}`)
-        if (!response.ok) throw new Error('Failed to fetch reservations')
-        
-        const data = await response.json()
-        setExistingReservations(data)
-      } catch (error) {
-        console.error('Error fetching reservations:', error)
-      }
-    }
-
-    fetchReservations()
-  }, [pickupLocation])
-
-  // Add function to fetch booked dates
-  useEffect(() => {
-    const fetchBookedDates = async () => {
-      if (!selectedCarId) return;
-
-      try {
-        const response = await fetch(`http://localhost:8800/reservations/booked-dates/${selectedCarId}`)
-        if (!response.ok) throw new Error('Failed to fetch booked dates')
-        
-        const data = await response.json()
-        setBookedDates(data.bookedDates)
-      } catch (error) {
-        console.error('Error fetching booked dates:', error)
-      }
-    }
-
-    fetchBookedDates()
-  }, [selectedCarId])
-
-  // Update isDateUnavailable function to check booked dates
-  const isDateUnavailable = (date: Date) => {
-    // First check if it's a past date
-    if (isBefore(date, startOfToday())) return true
-
-    // Then check if it's in booked dates
-    return bookedDates.some(period => {
-      const periodStart = new Date(period.start)
-      const periodEnd = new Date(period.end)
-      
-      return isWithinInterval(date, { 
-        start: periodStart,
-        end: periodEnd 
-      })
-    })
-  }
-
-  // Function to check if a date is disabled
-  const isDateDisabled = (date: Date) => {
-    return isBefore(date, startOfToday()) || isDateUnavailable(date)
-  }
-
-  // Handle search with improved availability check
+  // Handle search with availability check
   const handleSearch = async () => {
-    if (!pickupLocation || !returnLocation || !pickupDate || !returnDate) return
+    if (!pickupLocation || !returnLocation || !pickupDate || !returnDate) {
+      setError(t("fillAllFields"))
+      return
+    }
 
     setError(null)
     setIsCheckingAvailability(true)
     
     try {
-      // Format dates to ISO 8601
+      // Format dates for the API
       const pickupDateTime = new Date(
         pickupDate.getFullYear(),
         pickupDate.getMonth(),
@@ -294,34 +287,15 @@ export function HeroSection() {
         ...returnTime.split(":").map(Number)
       ).toISOString()
 
-      // Check for overlapping reservations
-      const hasOverlap = existingReservations.some(reservation => {
-        const reservationStart = parseISO(reservation.pickupTime)
-        const reservationEnd = parseISO(reservation.returnTime)
-        const newStart = parseISO(pickupDateTime)
-        const newEnd = parseISO(returnDateTime)
-
-        return (
-          isWithinInterval(newStart, { start: reservationStart, end: reservationEnd }) ||
-          isWithinInterval(newEnd, { start: reservationStart, end: reservationEnd }) ||
-          isWithinInterval(reservationStart, { start: newStart, end: newEnd })
-        )
-      })
-
-      if (hasOverlap) {
-        setError(t("selectedDatesUnavailable"))
-        return
-      }
-
-      // If no overlap, check car availability
-      const queryParams = new URLSearchParams({
+      // Check car availability
+      const params = {
         pickupTime: pickupDateTime,
         returnTime: returnDateTime,
         pickupLocation,
         returnLocation
-      })
+      }
 
-      const response = await fetch(`http://localhost:8800/reservations/cars/available?${queryParams.toString()}`)
+      const response = await fetch(buildApiUrl(config.api.endpoints.availableCars, params))
       const data = await response.json()
 
       if (!response.ok) {
@@ -342,6 +316,7 @@ export function HeroSection() {
       returnDate: format(returnDate, "yyyy-MM-dd"),
       returnTime,
     })
+
       router.push(`/search?${searchParams.toString()}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : t("errorOccurred"))
@@ -356,38 +331,32 @@ export function HeroSection() {
     // If return date is before pickup date, reset it
     if (date && returnDate && isBefore(returnDate, date)) {
       setReturnDate(undefined)
+      saveToStorage(STORAGE_KEYS.RETURN_DATE, null)
     }
   }
 
-  // Update calendar modifiers
+  // Function to check if a date is disabled
+  const isDateDisabled = (date: Date) => {
+    return isBefore(date, startOfToday())
+  }
+
+  // Calendar modifiers
   const modifiers = {
-    booked: (date: Date) => bookedDates.some(period => 
-      isWithinInterval(date, { 
-        start: new Date(period.start), 
-        end: new Date(period.end) 
-      })
-    ),
     past: (date: Date) => isBefore(date, startOfToday())
   }
 
-  // Update calendar modifier styles
+  // Calendar modifier styles
   const modifiersStyles = {
-    booked: {
-      color: 'red',
-      textDecoration: 'line-through',
-      backgroundColor: 'rgba(255, 0, 0, 0.1)'
-    },
     past: {
-      color: 'red',
-      textDecoration: 'line-through',
-      backgroundColor: 'rgba(255, 0, 0, 0.1)'
+      color: 'white',
+      backgroundColor: 'rgba(107, 114, 128, 0.8)',
+      textDecoration: 'line-through'
     }
   }
 
-  // Update calendar class names for modifiers
+  // Calendar class names
   const modifiersClassNames = {
-    booked: 'text-red-500 line-through bg-red-50',
-    past: 'text-red-500 line-through bg-red-50'
+    past: 'text-white bg-gray-500 line-through'
   }
 
   return (
@@ -412,11 +381,12 @@ export function HeroSection() {
                 <h3 className="text-lg font-bold text-gray-800 mb-4 uppercase tracking-wide">{t("rental")}</h3>
 
                 <div className="space-y-4">
+                  {/* Pickup Location */}
                   <div>
                     <Label className="text-sm text-gray-600 mb-2 block">{t("pickupLocation")}</Label>
-                    <Select value={pickupLocation} onValueChange={setPickupLocation}>
+                    <Select value={pickupLocation} onValueChange={handlePickupLocationChange}>
                       <SelectTrigger className="w-full h-12 rounded-lg border-gray-200 text-gray-500">
-                        <SelectValue placeholder={isLoading ? "Loading..." : t("selectCity")} />
+                        <SelectValue placeholder={isLoading ? t("loading") : t("selectCity")} />
                       </SelectTrigger>
                       <SelectContent className="max-h-[300px]">
                         {locations.filter(loc => loc.isActive).map((location) => (
@@ -428,6 +398,7 @@ export function HeroSection() {
                     </Select>
                   </div>
 
+                  {/* Pickup Date and Time */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label className="text-sm text-gray-600 mb-2 block">{t("pickupDate")}</Label>
@@ -474,11 +445,12 @@ export function HeroSection() {
                 <h3 className="text-lg font-bold text-gray-800 mb-4 uppercase tracking-wide">{t("return")}</h3>
 
                 <div className="space-y-4">
+                  {/* Return Location */}
                   <div>
                     <Label className="text-sm text-gray-600 mb-2 block">{t("returnLocation")}</Label>
                     <Select value={returnLocation} onValueChange={setReturnLocation}>
                       <SelectTrigger className="w-full h-12 rounded-lg border-gray-200 text-gray-500">
-                        <SelectValue placeholder={isLoading ? "Loading..." : t("selectCity")} />
+                        <SelectValue placeholder={isLoading ? t("loading") : t("selectCity")} />
                       </SelectTrigger>
                       <SelectContent className="max-h-[300px]">
                         {locations.filter(loc => loc.isActive).map((location) => (
@@ -490,6 +462,7 @@ export function HeroSection() {
                     </Select>
                   </div>
 
+                  {/* Return Date and Time */}
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label className="text-sm text-gray-600 mb-2 block">{t("returnDate")}</Label>
@@ -532,6 +505,7 @@ export function HeroSection() {
                 </div>
               </div>
 
+              {/* Search Button */}
               <Button
                 className="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-4 rounded-lg text-lg transition-colors uppercase tracking-wide"
                 disabled={!pickupDate || !returnDate || !pickupLocation || !returnLocation || isCheckingAvailability}
@@ -586,9 +560,7 @@ export function HeroSection() {
                   <Button
                     className="bg-orange-400 hover:bg-orange-500 text-white font-bold px-6 md:px-8 py-2 md:py-3 rounded-lg text-base md:text-lg transition-colors uppercase tracking-wide"
                   >
-                    {pickupDate && returnDate && pickupLocation && returnLocation
-                      ? t("rental")
-                      : t("seeMore")}
+                    {t("seeMore")}
                   </Button>
                 </Link>
               </div>

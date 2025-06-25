@@ -18,33 +18,33 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords: isEnglish
       ? 'monthly car rental Bulgaria, long term car hire, AUTO Rent monthly deals, car lease Bulgaria'
       : 'месечен наем на автомобили България, дългосрочен наем на коли, AUTO Rent месечни оферти, лизинг на автомобили България',
-    openGraph: {
+  openGraph: {
       title: isEnglish
         ? 'Monthly Car Rental Offers | AUTO Rent Bulgaria'
         : 'Месечни Оферти за Коли под Наем | AUTO Rent България',
       description: isEnglish
         ? 'Discover our monthly car rental deals in Bulgaria. Flexible long-term car rental options with premium vehicles.'
         : 'Разгледайте нашите месечни оферти за коли под наем в България. Гъвкави опции за дългосрочен наем на премиум автомобили.',
-      type: 'website',
+    type: 'website',
       locale: isEnglish ? 'en_US' : 'bg_BG',
-      images: [
-        {
-          url: '/images/bmw-3.png',
-          width: 1200,
-          height: 630,
+    images: [
+      {
+        url: '/images/bmw-3.png',
+        width: 1200,
+        height: 630,
           alt: isEnglish ? 'AUTO Rent Monthly Offers' : 'AUTO Rent Месечни Оферти'
-        }
-      ]
-    },
-    twitter: {
-      card: 'summary_large_image',
+      }
+    ]
+  },
+  twitter: {
+    card: 'summary_large_image',
       title: isEnglish
         ? 'Monthly Car Rental Offers | AUTO Rent Bulgaria'
         : 'Месечни Оферти за Коли под Наем | AUTO Rent България',
       description: isEnglish
         ? 'Discover our monthly car rental deals in Bulgaria. Premium vehicles for long-term rental.'
         : 'Разгледайте нашите месечни оферти за коли под наем в България. Премиум автомобили за дългосрочен наем.',
-      images: ['/images/bmw-3.png']
+    images: ['/images/bmw-3.png']
     },
     alternates: {
       canonical: 'https://autorent.bg/monthly-offers',
