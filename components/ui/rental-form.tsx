@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Calendar as CalendarIcon, Clock } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
-import { format, isBefore, startOfToday } from "date-fns"
+import { format, isBefore, startOfToday, differenceInDays } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn, STORAGE_KEYS, saveToStorage, getFromStorage } from "@/lib/utils"
@@ -21,6 +21,7 @@ interface Location {
   address: string
   city: string
   isActive: boolean
+  displayName?: string
 }
 
 interface TimeInputProps {
@@ -119,7 +120,15 @@ function TimeInput({ value, onChange, label }: TimeInputProps) {
 }
 
 interface RentalFormProps {
-  carId?: string
+  carId: string
+  car: {
+    pricing: {
+      "1_3": number
+      "4_7": number
+      "8_14": number
+      "15_plus": number
+    }
+  }
   className?: string
 }
 
@@ -130,19 +139,19 @@ const CONTACT_STORAGE_KEYS = {
   PHONE: 'contactPhone'
 } as const
 
-export function RentalForm({ carId, className }: RentalFormProps) {
+export function RentalForm({ carId, car, className }: RentalFormProps) {
   const [pickupLocation, setPickupLocation] = useState("")
   const [returnLocation, setReturnLocation] = useState("")
-  const [pickupDate, setPickupDate] = useState<Date | undefined>()
+  const [pickupDate, setPickupDate] = useState<Date | undefined>(undefined)
   const [pickupTime, setPickupTime] = useState("10:00")
-  const [returnDate, setReturnDate] = useState<Date | undefined>()
+  const [returnDate, setReturnDate] = useState<Date | undefined>(undefined)
   const [returnTime, setReturnTime] = useState("10:00")
   const [locations, setLocations] = useState<Location[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false)
   const router = useRouter()
-  const { t } = useLanguage()
+  const { t, formatPrice } = useLanguage()
   const [contactInfo, setContactInfo] = useState({
     name: '',
     email: '',
@@ -153,6 +162,10 @@ export function RentalForm({ carId, className }: RentalFormProps) {
     email?: string;
     phone?: string;
   }>({})
+  const [totalAmount, setTotalAmount] = useState<number | null>(null)
+  const [numberOfDays, setNumberOfDays] = useState<number | null>(null)
+  const [pricePerDay, setPricePerDay] = useState<number | null>(null)
+  const [needsChildSeat, setNeedsChildSeat] = useState(false)
 
   // Load saved data from localStorage
   useEffect(() => {
@@ -341,7 +354,7 @@ export function RentalForm({ carId, className }: RentalFormProps) {
         toDateTime: returnDateTime,
         totalAmount: availabilityData.cars[0].price,
         additionalServices: {
-          childSeat: false
+          childSeat: needsChildSeat
         }
       }
 
@@ -408,6 +421,42 @@ export function RentalForm({ carId, className }: RentalFormProps) {
     }
   }
 
+  // Calculate total amount when dates change
+  useEffect(() => {
+    if (pickupDate && returnDate && carId) {
+      const days = differenceInDays(returnDate, pickupDate) + 1 // +1 because we count both pickup and return days
+      setNumberOfDays(days)
+      
+      // Determine price per day based on rental duration
+      let dailyPrice = 0
+      if (days <= 3) dailyPrice = car.pricing["1_3"]
+      else if (days <= 7) dailyPrice = car.pricing["4_7"]
+      else if (days <= 14) dailyPrice = car.pricing["8_14"]
+      else dailyPrice = car.pricing["15_plus"]
+      
+      setPricePerDay(dailyPrice)
+      setTotalAmount(dailyPrice * days)
+    } else {
+      setTotalAmount(null)
+      setNumberOfDays(null)
+      setPricePerDay(null)
+    }
+  }, [pickupDate, returnDate, carId])
+
+  // Format location display name
+  const getLocationDisplayName = (location: Location) => {
+    if (location.city === "Varna" && location.name.includes("Airport")) {
+      return t("varnaAirport")
+    }
+    if (location.city === "Burgas" && location.name.includes("Airport")) {
+      return t("burgasAirport")
+    }
+    if (location.city === "Sunny Beach" || location.city === "Слънчев бряг") {
+      return t("sunnyBeach")
+    }
+    return `${location.name} (${location.city})`
+  }
+
   return (
     <div className="bg-white rounded-lg p-6 shadow-sm">
       <h3 className="text-xl font-bold text-gray-800 mb-6">{carId ? t("reservationDetails") : t("detailsForRental")}</h3>
@@ -431,9 +480,9 @@ export function RentalForm({ carId, className }: RentalFormProps) {
                 <SelectValue placeholder={isLoading ? t("loading") : t("selectCity")} />
               </SelectTrigger>
               <SelectContent className="max-h-[300px]">
-                {(locations || []).filter(loc => loc && loc.isActive).map((location) => (
+                {locations.filter(loc => loc.isActive).map((location) => (
                   <SelectItem key={location._id} value={location._id}>
-                    {location.name} ({location.city})
+                    {getLocationDisplayName(location)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -493,9 +542,9 @@ export function RentalForm({ carId, className }: RentalFormProps) {
                 <SelectValue placeholder={isLoading ? t("loading") : t("selectCity")} />
               </SelectTrigger>
               <SelectContent className="max-h-[300px]">
-                {(locations || []).filter(loc => loc && loc.isActive).map((location) => (
+                {locations.filter(loc => loc.isActive).map((location) => (
                   <SelectItem key={location._id} value={location._id}>
-                    {location.name} ({location.city})
+                    {getLocationDisplayName(location)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -599,6 +648,58 @@ export function RentalForm({ carId, className }: RentalFormProps) {
           </div>
         </div>
       </div>
+
+      {/* Additional Services Section */}
+      <div className="mb-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-4">{t("additionalServices")}</h3>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+            <div>
+              <p className="font-medium text-gray-800">{t("childSeat")}</p>
+              <p className="text-sm text-gray-600">{t("free")}</p>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="childSeat"
+                checked={needsChildSeat}
+                onChange={(e) => setNeedsChildSeat(e.target.checked)}
+                className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <Label htmlFor="childSeat" className="ml-2 text-sm text-gray-600">
+                {t("include")}
+              </Label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Price Summary Section */}
+      {totalAmount !== null && numberOfDays !== null && pricePerDay !== null && (
+        <div className="mb-6 bg-gray-50 rounded-lg p-4">
+          <h3 className="text-lg font-bold text-gray-800 mb-4">{t("priceBreakdown")}</h3>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>{t("numberOfDays")}:</span>
+              <span className="font-semibold">{numberOfDays}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>{t("pricePerDay")}:</span>
+              <span className="font-semibold">{formatPrice(pricePerDay.toString())}</span>
+            </div>
+            {needsChildSeat && (
+              <div className="flex justify-between text-sm">
+                <span>{t("childSeat")}:</span>
+                <span className="font-semibold text-green-600">{t("free")}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-base font-bold pt-2 border-t">
+              <span>{t("totalPrice")}:</span>
+              <span>{formatPrice(totalAmount.toString())}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Submit Button */}
       <Button

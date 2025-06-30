@@ -1,9 +1,9 @@
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Our Services | AUTO Rent Car Rental Bulgaria',
-  description: 'Discover our comprehensive car rental services in Bulgaria. Airport transfers, 24/7 support, vehicle delivery, and additional equipment. Professional service guaranteed.',
-  keywords: 'car rental services Bulgaria, AUTO Rent services, rent a car delivery, airport transfer Bulgaria, car hire extras',
+  title: 'Нашите Услуги | AUTO Rent България',
+  description: 'Открийте нашите цялостни услуги за автомобили под наем в България. Трансфер до летище, 24/7 поддръжка, доставка на автомобили и допълнително оборудване. Гарантирано професионално обслужване.',
+  keywords: 'коли под наем България, AUTO Rent услуги, наем на автомобил с доставка, трансфер летище България, екстри коли под наем',
   alternates: {
     canonical: 'https://autorent.bg/services',
     languages: {
@@ -27,44 +27,74 @@ export default function ServicesLayout({
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Service",
-            "name": "AUTO Rent Car Rental Services",
-            "description": "Comprehensive car rental services in Bulgaria",
+            "name": {
+              "@language": "bg",
+              "@value": "AUTO Rent Услуги за автомобили под наем"
+            },
+            "description": {
+              "@language": "bg",
+              "@value": "Цялостни услуги за автомобили под наем в България"
+            },
             "provider": {
               "@type": "Organization",
               "name": "AUTO Rent",
-              "description": "Premium car rental service in Bulgaria"
+              "description": {
+                "@language": "bg",
+                "@value": "Премиум услуги за автомобили под наем в България"
+              }
             },
             "areaServed": {
               "@type": "Country",
-              "name": "Bulgaria"
+              "name": "България"
             },
-            "availableLanguage": ["English", "Bulgarian"],
+            "availableLanguage": ["Български", "English"],
             "hasOfferCatalog": {
               "@type": "OfferCatalog",
-              "name": "Car Rental Services",
+              "name": {
+                "@language": "bg",
+                "@value": "Услуги за автомобили под наем"
+              },
               "itemListElement": [
                 {
                   "@type": "Offer",
                   "itemOffered": {
                     "@type": "Service",
-                    "name": "Airport Transfer",
-                    "description": "Car delivery to all major airports in Bulgaria"
+                    "name": {
+                      "@language": "bg",
+                      "@value": "Трансфер до летище"
+                    },
+                    "description": {
+                      "@language": "bg",
+                      "@value": "Доставка на автомобили до всички основни летища в България"
+                    }
                   }
                 },
                 {
                   "@type": "Offer",
                   "itemOffered": {
                     "@type": "Service",
-                    "name": "24/7 Support",
-                    "description": "Round-the-clock customer assistance"
+                    "name": {
+                      "@language": "bg",
+                      "@value": "24/7 Поддръжка"
+                    },
+                    "description": {
+                      "@language": "bg",
+                      "@value": "Денонощна поддръжка на клиенти"
+                    }
                   }
                 },
                 {
                   "@type": "Offer",
                   "itemOffered": {
                     "@type": "Service",
-                    "name": "Additional Equipment",
-                    "description": "GPS, child seats, and other extras available"
+                    "name": {
+                      "@language": "bg",
+                      "@value": "Допълнително оборудване"
+                    },
+                    "description": {
+                      "@language": "bg",
+                      "@value": "GPS, детски столчета и други екстри"
+                    }
                   }
                 }
               ]

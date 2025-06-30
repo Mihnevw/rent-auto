@@ -175,7 +175,7 @@ export function CarDetailClient({ car }: CarDetailClientProps) {
 
               <div className="flex items-center gap-3">
                 <Settings className="w-5 h-5 text-blue-500" />
-                <span className="text-gray-700">{car.transmission}</span>
+                <span className="text-gray-700">{car.transmission === "automatic" ? t("automatic") : t("manual")}</span>
               </div>
 
               <div className="flex items-center gap-3">
@@ -230,7 +230,7 @@ export function CarDetailClient({ car }: CarDetailClientProps) {
 
           {/* Right Column - Rental Form */}
           <div className="lg:col-span-1">
-            <RentalForm carId={car._id} />
+            <RentalForm carId={car._id} car={car} />
           </div>
         </div>
 

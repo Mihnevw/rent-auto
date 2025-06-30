@@ -9,7 +9,6 @@ import { DeliverySection } from "@/components/sections/delivery-section"
 import { FooterSection } from "@/components/sections/footer-section"
 import Head from "next/head"
 import { useLanguage } from "@/lib/language-context"
-import Image from "next/image"
 
 export default function DLRentHomepage() {
   const { t } = useLanguage()

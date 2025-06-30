@@ -76,7 +76,7 @@ export const translations = {
     aboutMainDescription: "AUTO RENT е водеща компания за автомобили под наем, предлагаща надеждни, удобни и прозрачни услуги за клиенти в България. Нашата основна мисия е да осигурим комфортно, сигурно и безпроблемно пътуване с качествени автомобили, без скрити такси и с включено пълно автокаско.",
     officialRegistration: "Официална регистрация",
     registrationInfo: "AUTO RENT е фирма регистрирана в търговския регистър като:",
-    companyName: "АВТО РЕНТ ЕООД",
+    companyName: "АУТО РЕНТ ЕООД",
     companyAddress: "Адрес: гр. Слънчев бряг",
     ourLocations: "Нашите локации:",
     deliveryToAddress: "Доставка до адрес",
@@ -97,7 +97,7 @@ export const translations = {
     servicesTitle: "Услуги",
     homeDelivery: "ДОСТАВКА ДО АДРЕС",
     homeDeliveryText:
-      "Доставка на автомобила до дома ви, или до точен адрес в цялата страна. Не е необходимо да взимате такси до офиса ни, ние ще ви доставим колата пред входа на вашия дом.",
+      "Доставка на автомобила до дома ви, или до точен адрес в района на Черноморието - перфектни за разходки из крайбрежието. Ако желаете да наемете автомобил от различна локация моля, свържете се с нас на посочения телефон.",
     airportDelivery: "ДОСТАВКА ДО ЛЕТИЩЕ",
     airportDeliveryText: "Ще пътувате със самолет ? Ние ще ви доставим автомобил под наем директно на летището.",
     countryDelivery: "ДОСТАВКА ДО ЦЯЛАТА СТРАНА",
@@ -105,7 +105,7 @@ export const translations = {
       "Колата ви се е повредила по време на пътуване, или и предстои ремонт и трябва да я оставите в сервиз - Ние ще ви осигурим автомобил за този период. Предлагаме доставка на автомобил до място на аварията.",
 
     // Prices
-    pricesTitle: "ЦЕНИ ЛЯТО 01.06-31.08 / ЦЕНИ ЗИМА 01.09-31.05",
+    pricesTitle: "ЦЕНИ ЛЯТО 01.06-31.08",
     summerPrice: "ЦЕНА /ЛЯТО/",
     summerDeposit: "ДЕПОЗИТ /ЛЯТО/",
     junePrice: "ЦЕНИ ЮНИ /01.06-30.06/",
@@ -156,6 +156,7 @@ export const translations = {
     newCars: "Нови автомобили",
     competitivePrices: "Конкурентни цени",
     fullInsurance: "Пълна застраховка",
+    fullInsuranceText: "Включена е пълна застраховка на автомобила",
     support24_7: "24/7 поддръжка",
 
     // Cars page
@@ -209,10 +210,10 @@ export const translations = {
     privacyPolicyFooter: "Политика за поверителност",
     servicesFooter: "УСЛУГИ",
     carRental: "Автомобили под наем",
-    businessOffers: "Бизнес предложения",
+    servicesFooterEn: "Услуги",
     fleet: "АВТОПАРК",
     contactsFooter: "КОНТАКТИ",
-    officeStaraZagora: "Офис Слънчев бряг",
+    officeStaraZagora: "Слънчев бряг, България",
     footerDescription:
       "Ние предлагаме голям избор от автомобили под наем от различни категории, които обхващат най-различни нужди и потребности.",
 
@@ -281,8 +282,13 @@ export const translations = {
     bmw3Series: "БМВ СЕРИЯ 3",
 
     // Contact Details
-    officeAddress: "ул. Цар Симеон Велики 83",
-    officeEmail: "proauto@autorent.bg",
+    officeAddress: "Слънчев бряг, България",
+    officeEmail: "ivanrent11@gmail.com",
+    place: "Местоположение",
+    modern: "Модерни и добре поддържани автомобили",
+    bestPrices: "Най-добрите цени в региона",
+    fullInsuranceEn: "Каско и ГО застраховка включени",
+    support24_7En: "Винаги на разположение за помощ",
 
     // Office Location
     ourOffice: "Нашият офис",
@@ -309,7 +315,7 @@ export const translations = {
     howToOrderService: "Как да поръчате услуга",
     howToOrderDescription: "За да поръчате някоя от нашите услуги, моля свържете се с нас по телефона или изпратете заявка по email.",
     deliveryTime: "Доставката се извършва в рамките на 2-4 часа",
-    emergencyService: "За спешни случаи - 24/7 обслужване",
+    emergencyService: "За спешни случаи - 0894818283",
     advanceBooking: "Предварително резервиране препоръчително",
     paymentOnDelivery: "Плащането се извършва при получаване",
     workingHoursDetailed: "Пн-Пт 08:00-18:00, Сб 09:00-17:00",
@@ -388,7 +394,9 @@ export const translations = {
 
     // Additional Services
     additionalServices: "Допълнителни услуги",
+    childSeatbg: "Детско столче",
     free: "Безплатно",
+    include: "Включи",
     priceStartsFrom: "Цена от",
     detailsForRental: "Детайли за наемане",
 
@@ -404,7 +412,24 @@ export const translations = {
     bookingDetails: "Детайли за резервацията",
 
     // Error messages
-    failedToCreateReservation: "Неуспешно създаване на резервация"
+    failedToCreateReservation: "Неуспешно създаване на резервация",
+
+    // Form validation
+    error: "Грешка",
+    invalidEmailFormat: "Моля, използвайте валиден имейл адрес.",
+    invalidPhoneFormat: "Невалиден телефонен номер. Моля, въведете поне 10 цифри в правилен формат.",
+
+    // Locations
+    varnaAirport: "Летище Варна",
+    burgasAirport: "Летище Бургас",
+    sunnyBeachBg: "Слънчев бряг",
+
+    economicCar: "ИКОНОМИЧЕН",
+    suvCar: "SUV",
+    wagonCar: "КОМБИ",
+
+    showMoreMobile: "Виж повече",
+    hideAllMobile: "Скрий всички",
   },
   en: {
     // Header
@@ -515,7 +540,7 @@ export const translations = {
       "Your car broke down while traveling, or needs repair and you have to leave it at the service - We will provide you with a car for this period. We offer car delivery to the breakdown location.",
 
     // Prices
-    pricesTitle: "SUMMER PRICES 01.06-31.08 / WINTER PRICES 01.09-31.05",
+    pricesTitle: "SUMMER PRICES 01.06-31.08",
     summerPrice: "PRICE /SUMMER/",
     summerDeposit: "DEPOSIT /SUMMER/",
     junePrice: "JUNE PRICES /01.06-30.06/",
@@ -614,10 +639,10 @@ export const translations = {
     privacyPolicyFooter: "Privacy Policy",
     servicesFooter: "SERVICES",
     carRental: "Car Rental",
-    businessOffers: "Business Offers",
+    servicesFooterEn: "Services",
     fleet: "FLEET",
     contactsFooter: "CONTACTS",
-    officeStaraZagora: "Office Sunny Beach",
+    officeStaraZagora: "Sunny Beach, Bulgaria",
     footerDescription:
       "We offer a wide selection of rental cars from different categories that cover a variety of needs and requirements.",
 
@@ -686,8 +711,13 @@ export const translations = {
     bmw3Series: "BMW 3 SERIES",
 
     // Contact Details
-    officeAddress: "83 Tsar Simeon Veliki Str.",
-    officeEmail: "proauto@autorent.bg",
+    officeAddress: "Sunny Beach, Bulgaria",
+    officeEmail: "ivanrent11@gmail.com",
+    place: "Location",
+    modern: "Modern and well-maintained cars",
+    bestPrices: "Best prices in the region",
+    fullInsuranceEn: "Full insurance",
+    support24_7En: "24/7 support",
 
     // Office Location
     ourOffice: "Our Office",
@@ -714,7 +744,7 @@ export const translations = {
     howToOrderService: "How to Order a Service",
     howToOrderDescription: "To order any of our services, please contact us by phone or send a request via email.",
     deliveryTime: "Delivery is made within 2-4 hours",
-    emergencyService: "For emergencies - 24/7 service",
+    emergencyService: "For emergencies - 0894818283",
     advanceBooking: "Advance booking recommended",
     paymentOnDelivery: "Payment is made upon delivery",
     workingHoursDetailed: "Mon-Fri 08:00-18:00, Sat 09:00-17:00",
@@ -793,7 +823,9 @@ export const translations = {
 
     // Additional Services
     additionalServices: "Additional Services",
+    childSeaten: "Child Seat",
     free: "Free",
+    include: "Include",
     priceStartsFrom: "Price from",
     detailsForRental: "Rental Details",
 
@@ -807,6 +839,23 @@ export const translations = {
     phoneRequired: "Phone number is required",
     invalidPhone: "Please enter a valid phone number",
     bookingDetails: "Booking Details",
+
+    // Form validation
+    error: "Error",
+    invalidEmailFormat: "Please use a valid email address.",
+    invalidPhoneFormat: "Invalid phone number. Please enter at least 10 digits in a valid format.",
+
+    // Locations
+    varnaAirport: "Varna Airport",
+    burgasAirport: "Burgas Airport",
+    sunnyBeachEn: "Sunny Beach",
+
+    economicCar: "ECONOMIC",
+    suvCar: "SUV",
+    wagonCar: "WAGON",
+
+    showMoreMobile: "Show More",
+    hideAllMobile: "Hide All",
   }
 } as const
 

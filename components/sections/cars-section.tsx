@@ -146,7 +146,7 @@ export function CarsSection() {
                 <div className="grid grid-cols-2 gap-2 sm:gap-3 mb-4">
                   <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                     <Settings className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                    <span className="truncate">{car.transmission}</span>
+                    <span className="truncate">{car.transmission === "automatic" ? t("automatic") : t("manual")}</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                     <DoorOpen className="w-4 h-4 text-blue-500 flex-shrink-0" />

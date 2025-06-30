@@ -189,8 +189,8 @@ export default function ServicesPage() {
                   </p>
                   <p className="text-blue-700">
                     <strong>{t("email")}:</strong>{" "}
-                    <a href="mailto:info@autorent.bg" className="hover:text-blue-600 transition-colors">
-                      info@autorent.bg
+                    <a href="mailto:ivanrent11@gmail.com" className="hover:text-blue-600 transition-colors">
+                      ivanrent11@gmail.com
                     </a>
                   </p>
                   <p className="text-blue-700">

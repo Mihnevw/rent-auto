@@ -229,7 +229,7 @@ export default function PricesPage() {
           </div>
 
           {/* Additional Information */}
-          <div className="mt-4 sm:mt-8 grid md:grid-cols-2 gap-4 sm:gap-8">
+          {/* <div className="mt-4 sm:mt-8 grid md:grid-cols-2 gap-4 sm:gap-8">
             <div className="bg-white rounded-lg p-4 sm:p-6 shadow-lg">
               <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4">{t("includedInPrice")}</h2>
               <ul className="space-y-2 text-gray-600 text-sm sm:text-base">
@@ -269,7 +269,7 @@ export default function PricesPage() {
                 </div>
               </div>
                 </div>
-          </div>
+          </div> */}
         </main>
         <FooterSection />
       </div>

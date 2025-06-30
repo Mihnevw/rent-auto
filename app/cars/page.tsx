@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format, isBefore, startOfToday } from "date-fns"
 import { cn, STORAGE_KEYS, saveToStorage, getFromStorage } from "@/lib/utils"
 import { FooterSection } from "@/components/sections/footer-section"
+import { useMobile } from "@/hooks/use-mobile"
 
 interface Location {
   _id: string
@@ -22,6 +23,7 @@ interface Location {
   address: string
   city: string
   isActive: boolean
+  displayName?: string
 }
 
 interface TimeInputProps {
@@ -187,6 +189,14 @@ export default function CarsPage() {
   })
 
   const { t, formatPrice } = useLanguage()
+
+  const [visibleCarsOnMobile, setVisibleCarsOnMobile] = useState(4)
+  const isMobile = useMobile()
+
+  // Get visible cars based on device
+  const displayedCars = isMobile 
+    ? cars.slice(0, visibleCarsOnMobile)
+    : cars
 
   // Load saved data from localStorage
   useEffect(() => {
@@ -365,6 +375,29 @@ export default function CarsPage() {
     past: 'text-white bg-gray-500 line-through'
   }
 
+  // Format location display name
+  const getLocationDisplayName = (location: Location) => {
+    if (location.city === "Varna" && location.name.includes("Airport")) {
+      return t("varnaAirport")
+    }
+    if (location.city === "Burgas" && location.name.includes("Airport")) {
+      return t("burgasAirport")
+    }
+    if (location.city === "Sunny Beach" || location.city === "Слънчев бряг") {
+      return t("sunnyBeach")
+    }
+    return `${location.name} (${location.city})`
+  }
+
+  const showAllCarsOnMobile = () => {
+    setVisibleCarsOnMobile(filteredCars.length)
+  }
+
+  const hideAllCarsOnMobile = () => {
+    setVisibleCarsOnMobile(4)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -381,6 +414,11 @@ export default function CarsPage() {
       <Header />
 
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Description Text - Always visible on top for mobile */}
+        <div className="lg:hidden mb-8">
+          <p className="text-gray-700 text-lg leading-relaxed">{t("carsPageDescription")}</p>
+        </div>
+
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Sidebar Filters */}
           <div className="lg:col-span-1">
@@ -400,7 +438,7 @@ export default function CarsPage() {
                       <SelectContent className="max-h-[300px]">
                         {locations.filter(loc => loc.isActive).map((location) => (
                           <SelectItem key={location._id} value={location._id}>
-                            {location.name} ({location.city})
+                            {getLocationDisplayName(location)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -462,7 +500,7 @@ export default function CarsPage() {
                       <SelectContent className="max-h-[300px]">
                         {locations.filter(loc => loc.isActive).map((location) => (
                           <SelectItem key={location._id} value={location._id}>
-                            {location.name} ({location.city})
+                            {getLocationDisplayName(location)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -613,85 +651,120 @@ export default function CarsPage() {
 
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Header Text */}
-            <div className="mb-8">
+            {/* Description Text - Only visible on desktop */}
+            <div className="hidden lg:block mb-8">
               <p className="text-gray-700 text-lg leading-relaxed">{t("carsPageDescription")}</p>
-              <div className="mt-4 text-sm text-gray-600">
-                {t("showingCars")} {filteredCars.length} {t("ofCars")} {cars.length} {t("carsForPeriod")}
-              </div>
+            </div>
+
+            {/* Cars count info */}
+            <div className="mb-8 text-sm text-gray-600">
+              {t("showingCars")} {filteredCars.length} {t("ofCars")} {cars.length} {t("carsForPeriod")}
             </div>
 
             {/* Cars List */}
             <div className="space-y-6">
               {filteredCars.length > 0 ? (
-                filteredCars.map((car) => (
-                  <div 
-                    key={car._id} 
-                    className="relative bg-white rounded-lg shadow-sm p-6 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl group"
-                  >
-                    {/* Gradient border overlay */}
-                    <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500 to-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ padding: '2px' }}>
-                      <div className="h-full w-full bg-white rounded-lg"></div>
+                <>
+                  {displayedCars.map((car) => (
+                    <div 
+                      key={car._id} 
+                      className="relative bg-white rounded-lg shadow-sm p-6 transform transition-all duration-300 hover:-translate-y-2 hover:shadow-xl group"
+                    >
+                      {/* Gradient border overlay */}
+                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500 to-green-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ padding: '2px' }}>
+                        <div className="h-full w-full bg-white rounded-lg"></div>
+                      </div>
+                      
+                      {/* Content container */}
+                      <div className="relative z-10 grid md:grid-cols-3 gap-6 items-center">
+                        {/* Car Image */}
+                        <div className="md:col-span-1">
+                          <Image
+                            src={car.mainImage ? `http://localhost:8800${car.mainImage}` : "/placeholder.svg"}
+                            alt={car.name}
+                            width={300}
+                            height={200}
+                            className="w-full h-40 object-contain"
+                          />
+                        </div>
+
+                        {/* Car Details */}
+                        <div className="md:col-span-1">
+                          <div className="flex items-start gap-2 mb-4">
+                            <h3 className="text-xl font-bold text-blue-600">{car.name}</h3>
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Fuel className="w-4 h-4 text-blue-500" />
+                              <span>{t("engineType")}: {car.engine}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Settings className="w-4 h-4 text-blue-500" />
+                              <span>{t("transmission")}: {car.transmission === "automatic" ? t("automatic") : t("manual")}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Users className="w-4 h-4 text-blue-500" />
+                              <span>{car.seats} {t("seats")}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Car className="w-4 h-4 text-blue-500" />
+                              <span>{car.doors} {t("doors")}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600">
+                              <Gauge className="w-4 h-4 text-blue-500" />
+                              <span>{t("fuelConsumption")}: {car.consumption}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Price and Action */}
+                        <div className="md:col-span-1 text-right">
+                          <div className="flex justify-end mb-2">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-400 text-white">
+                              {car.bodyType.toLowerCase() === 'sedan' ? t("economicCar") : 
+                               car.bodyType.toLowerCase() === 'suv' ? t("suvCar") :
+                               car.bodyType.toLowerCase() === 'wagon' ? t("wagonCar") :
+                               car.bodyType.toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="mb-4">
+                            <div className="text-3xl font-bold text-blue-600">{formatPrice(car.pricing["1_3"].toString())}</div>
+                            <div className="text-sm text-gray-500">{t("perDay")}</div>
+                          </div>
+                          <Link href={`/cars/${car._id}`}>
+                            <Button className="bg-gradient-to-r from-blue-500 to-green-500 text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-green-600 transition-all duration-300 font-semibold px-6 py-2 rounded-3xl">
+                              {t("viewDetails")}
+                            </Button>
+                          </Link>
+                        </div>
+                      </div>
                     </div>
-                    
-                    {/* Content container */}
-                    <div className="relative z-10 grid md:grid-cols-3 gap-6 items-center">
-                      {/* Car Image */}
-                      <div className="md:col-span-1">
-                        <Image
-                          src={car.mainImage ? `http://localhost:8800${car.mainImage}` : "/placeholder.svg"}
-                          alt={car.name}
-                          width={300}
-                          height={200}
-                          className="w-full h-40 object-contain"
-                        />
-                      </div>
+                  ))}
 
-                      {/* Car Details */}
-                      <div className="md:col-span-1">
-                        <div className="flex items-start gap-2 mb-4">
-                          <h3 className="text-xl font-bold text-blue-600">{car.name}</h3>
-                        </div>
-
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Fuel className="w-4 h-4 text-blue-500" />
-                            <span>{t("engineType")}: {car.engine}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Settings className="w-4 h-4 text-blue-500" />
-                            <span>{t("transmission")}: {car.transmission}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Users className="w-4 h-4 text-blue-500" />
-                            <span>{car.seats} {t("seats")}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Car className="w-4 h-4 text-blue-500" />
-                            <span>{car.doors} {t("doors")}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600">
-                            <Gauge className="w-4 h-4 text-blue-500" />
-                            <span>{t("fuelConsumption")}: {car.consumption}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Price and Action */}
-                      <div className="md:col-span-1 text-right">
-                        <div className="mb-4">
-                          <div className="text-3xl font-bold text-blue-600">{formatPrice(car.pricing["1_3"].toString())}</div>
-                          <div className="text-sm text-gray-500">{t("perDay")}</div>
-                        </div>
-                        <Link href={`/cars/${car._id}`}>
-                          <Button className="bg-gradient-to-r from-blue-500 to-green-500 text-white hover:bg-gradient-to-r hover:from-blue-600 hover:to-green-600 transition-all duration-300 font-semibold px-6 py-2 rounded-3xl">
-                            {t("viewDetails")}
-                          </Button>
-                        </Link>
-                      </div>
+                  {/* Mobile-only pagination buttons */}
+                  {isMobile && filteredCars.length > 4 && (
+                    <div className="flex flex-col items-center gap-4 mt-8">
+                      {visibleCarsOnMobile < filteredCars.length && (
+                        <Button
+                          onClick={showAllCarsOnMobile}
+                          className="bg-orange-400 hover:bg-orange-500 text-white font-semibold px-6 py-2 rounded-full w-full max-w-xs"
+                        >
+                          Виж повече
+                        </Button>
+                      )}
+                      
+                      {visibleCarsOnMobile > 4 && (
+                        <Button
+                          onClick={hideAllCarsOnMobile}
+                          className="bg-gray-500 hover:bg-gray-600 text-white font-semibold px-6 py-2 rounded-full w-full max-w-xs"
+                        >
+                          Скрий всички
+                        </Button>
+                      )}
                     </div>
-                  </div>
-                ))
+                  )}
+                </>
               ) : (
                 <div className="text-center py-12">
                   <div className="text-gray-500 text-lg mb-4">Няма автомобили, отговарящи на избраните критерии</div>

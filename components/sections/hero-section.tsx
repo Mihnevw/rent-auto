@@ -24,6 +24,7 @@ interface Location {
   address: string
   city: string
   isActive: boolean
+  displayName?: string
 }
 
 interface Reservation {
@@ -46,37 +47,37 @@ interface AvailabilityStatus {
 // Featured cars data
 const featuredCars: Array<{
   id: number
-  nameKey: TranslationKey
+  name: string
   image: string
   alt: string
 }> = [
   {
     id: 1,
-    nameKey: "shkodaOctavia",
+    name: "SKODA OCTAVIA",
     image: "/images/shkoda.png?height=300&width=500",
-    alt: "SHKODA OCTAVIA"
+    alt: "SKODA OCTAVIA"
   },
   {
     id: 2,
-    nameKey: "rangeRover",
+    name: "RANGE ROVER",
     image: "/images/range.png?height=300&width=500",
     alt: "RANGE ROVER"
   },
   {
     id: 3,
-    nameKey: "opelInsignia",
+    name: "OPEL INSIGNIA",
     image: "/images/opel.png?height=300&width=500",
     alt: "OPEL INSIGNIA"
   },
   {
     id: 4,
-    nameKey: "mercedesC220",
+    name: "MERCEDES C220",
     image: "/images/mercedes.png?height=300&width=500",
     alt: "MERCEDES C220"
   },
   {
     id: 5,
-    nameKey: "bmw3Series",
+    name: "BMW 3 SERIES",
     image: "/images/bmw-3.png?height=300&width=500",
     alt: "BMW 3"
   }
@@ -359,6 +360,20 @@ export function HeroSection() {
     past: 'text-white bg-gray-500 line-through'
   }
 
+  // Format location display name
+  const getLocationDisplayName = (location: Location) => {
+    if (location.city === "Varna" && location.name.includes("Airport")) {
+      return t("varnaAirport")
+    }
+    if (location.city === "Burgas" && location.name.includes("Airport")) {
+      return t("burgasAirport")
+    }
+    if (location.city === "Sunny Beach" || location.city === "Слънчев бряг") {
+      return t("sunnyBeach")
+    }
+    return `${location.name} (${location.city})`
+  }
+
   return (
     <section className="relative min-h-[600px] bg-gradient-to-r from-blue-500 to-green-500 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 py-8 md:py-16 relative z-10">
@@ -391,7 +406,7 @@ export function HeroSection() {
                       <SelectContent className="max-h-[300px]">
                         {locations.filter(loc => loc.isActive).map((location) => (
                           <SelectItem key={location._id} value={location._id}>
-                            {location.name} ({location.city})
+                            {getLocationDisplayName(location)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -455,7 +470,7 @@ export function HeroSection() {
                       <SelectContent className="max-h-[300px]">
                         {locations.filter(loc => loc.isActive).map((location) => (
                           <SelectItem key={location._id} value={location._id}>
-                            {location.name} ({location.city})
+                            {getLocationDisplayName(location)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -536,7 +551,7 @@ export function HeroSection() {
                   {featuredCars.map((car) => (
                     <CarouselItem key={car.id}>
                       <div className="px-4">
-                        <div className="text-xl md:text-2xl text-white font-bold mb-4 md:mb-8">{t(car.nameKey)}</div>
+                        <div className="text-xl md:text-2xl text-white font-bold mb-4 md:mb-8">{car.name}</div>
                         <div className="aspect-[16/9] relative px-4 md:px-16">
                           <Image
                             src={car.image}

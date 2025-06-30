@@ -113,7 +113,7 @@ export default function MonthlyOffersPage() {
             const deposit = calculateDeposit(car.pricing["15_plus"])
             
             return (
-              <div key={car._id} className="bg-white rounded-2xl border-2 border-[#c4ec64] p-4 sm:p-8 shadow-sm">
+              <div key={car._id} className="bg-white rounded-2xl border-2 border-[#c4ec64] p-4 sm:p-8 shadow-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-lg">
                 <div className="grid lg:grid-cols-2 gap-4 sm:gap-8 items-center">
                   {/* Left Side - Car Details */}
                   <div>
@@ -130,7 +130,7 @@ export default function MonthlyOffersPage() {
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                         <span className="text-sm sm:text-base text-gray-700">
-                          {t("transmission")}: <span className="text-gray-900 font-semibold">{car.transmission}</span>
+                          {t("transmission")}: <span className="text-gray-900 font-semibold">{car.transmission === "automatic" ? t("automatic") : t("manual")}</span>
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -177,7 +177,7 @@ export default function MonthlyOffersPage() {
                       alt={car.name}
                       width={500}
                       height={300}
-                      className="max-w-full h-auto rounded-lg"
+                      className="max-w-full h-auto rounded-lg transition-transform duration-300 hover:scale-105"
                     />
                   </div>
                 </div>
@@ -239,7 +239,7 @@ export default function MonthlyOffersPage() {
                 </dd>
                 <dt className="sr-only">Email</dt>
                 <dd className="text-blue-700 mb-2">
-                  <strong>Email:</strong> <a href="mailto:info@dlrent.bg" className="hover:underline" aria-label="Email us">info@dlrent.bg</a>
+                  <strong>Email:</strong> <a href="mailto:ivanrent11@gmail.com" className="hover:underline" aria-label="Email us">ivanrent11@gmail.com</a>
                 </dd>
                 <dt className="sr-only">{t("workingHours")}</dt>
                 <dd className="text-blue-700">
