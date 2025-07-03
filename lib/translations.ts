@@ -1,3 +1,5 @@
+import { paymentTranslations } from './payment-translations';
+
 export const translations = {
   bg: {
     // Header
@@ -12,6 +14,8 @@ export const translations = {
 
     // Common
     loading: "Зареждане...",
+    processing: "Обработка...",
+    checking: "Проверка...",
     seeMore: "ВИЖ ПОВЕЧЕ",
     rent: "НАЕМИ",
     rental: "НАЕМАНЕ",
@@ -73,7 +77,7 @@ export const translations = {
 
     // About page
     aboutTitle: "Кои сме ние ?",
-    aboutMainDescription: "AUTO RENT е водеща компания за автомобили под наем, предлагаща надеждни, удобни и прозрачни услуги за клиенти в България. Нашата основна мисия е да осигурим комфортно, сигурно и безпроблемно пътуване с качествени автомобили, без скрити такси и с включено пълно автокаско.",
+    aboutMainDescription: "AUTO RENT е водеща компания за автомобили под наем, предлагаща надеждни, удобни и прозрачни услуги за клиенти. Нашата основна мисия е да осигурим комфортно, сигурно и безпроблемно пътуване с качествени автомобили, без скрити такси и с включено пълно автокаско.",
     officialRegistration: "Официална регистрация",
     registrationInfo: "AUTO RENT е фирма регистрирана в търговския регистър като:",
     companyName: "АУТО РЕНТ ЕООД",
@@ -82,7 +86,7 @@ export const translations = {
     deliveryToAddress: "Доставка до адрес",
     deliveryDescription: "Автомобилите се доставят до адрес, директно до дома Ви или до летището. Тази екстра Ви спестява ходене до локацията с такси или градски транспорт, за да получите автомобила, който искате да наемете.",
     ourFleet: "Нашият автопарк",
-    fleetDescription: "Компанията развива своята дейност с отдаване на автомобили под наем от началото на 2023г. Предлагаме нови коли от висок клас. Цели ни е да осигурим максимален комфорт при избирането, ситуирност на пътя, приятна атмосфера при дълги пътувания и всякакъв вид автомобилно удобство с множеството екстри, с които са снабдени автомобилите ни. Всички автомобили се обслужват само в оторизиран сервизи, с което гарантираме безупречното техническо състояние на всички наши автомобили.",
+    fleetDescription: "Компанията развива своята дейност с отдаване на автомобили под наем от началото на 2023г. Предлагаме нови коли от висок клас. Целта ни е да осигурим максимален комфорт при избирането, сигурност на пътя, приятна атмосфера при дълги пътувания и всякакъв вид автомобилно удобство с множеството екстри, с които са снабдени автомобилите ни. Всички автомобили се обслужват само в оторизиран сервизи, с което гарантираме безупречното техническо състояние на всички наши автомобили.",
     finalNote: "За краткия ни опит в бранша можем да бъдем горди с това, че нямаме разочарован или недоволен клиент от нашите услуги. Отличаваме се да удовлетворим всички изисквания и желания на нашите клиенти, и мислим, че успяваме.",
     experienceSince2023: "С опит от 2023г.",
     satisfiedClients: "100% доволни клиенти",
@@ -218,13 +222,9 @@ export const translations = {
       "Ние предлагаме голям избор от автомобили под наем от различни категории, които обхващат най-различни нужди и потребности.",
 
     // Cities
-    burgas: "Бургас",
-    pomorie: "Поморие",
-    nessebar: "Несебър",
     sunnyBeach: "Слънчев бряг",
-    svetiVlas: "Свети Влас",
-    varna: "Варна",
-    goldenSands: "Златни пясъци",
+    burgasAirport: "Летище Бургас",
+    varnaAirport: "Летище Варна",
     plovdiv: "Пловдив",
     staraZagora: "Стара Загора",
     selectCity: "Изберете град",
@@ -305,11 +305,12 @@ export const translations = {
     // Services page
     additionalServicesAndPrices: "Допълнителни услуги и цени",
     convenienceServices: "Услуги за удобство",
-    deliveryBlackSea: "Доставка в рамките на Черноморието",
+    deliveryBlackSea: "За взимане или връщане на автомобил на локация, различна от избраните, моля свържете се с нас на:",
     deliveryOutsideBlackSea: "Доставка извън Черноморието",
     returnOutsideWorkingHours: "Връщане извън работно време",
     additionalEquipment: "Допълнително оборудване",
     gpsNavigation: "GPS Навигация",
+    freePrice: "Безплатно",
 
     // How to Order Section
     howToOrderService: "Как да поръчате услуга",
@@ -420,8 +421,8 @@ export const translations = {
     invalidPhoneFormat: "Невалиден телефонен номер. Моля, въведете поне 10 цифри в правилен формат.",
 
     // Locations
-    varnaAirport: "Летище Варна",
-    burgasAirport: "Летище Бургас",
+    varnaAirportBg: "Летище Варна",
+    burgasAirportBg: "Летище Бургас",
     sunnyBeachBg: "Слънчев бряг",
 
     economicCar: "ИКОНОМИЧЕН",
@@ -430,11 +431,73 @@ export const translations = {
 
     showMoreMobile: "Виж повече",
     hideAllMobile: "Скрий всички",
+
+    // Success page
+    bookingSuccess: "Успешна резервация!",
+    bookingConfirmationSent: "Изпратихме потвърждение за резервацията на вашия имейл.",
+    checkEmailForCode: "Моля, проверете вашия имейл за код на резервацията.",
+    redirectingHome: "Ще бъдете пренасочени към началната страница след {seconds} секунди",
+    whatHappensNext: "Какво следва",
+    checkEmailStep: "Проверете имейла си за потвърждение на резервацията",
+    saveBookingCode: "Запазете кода на резервацията си",
+    contactForQuestions: "Свържете се с нас при въпроси",
+    thankYouForBooking: "Благодарим ви, че избрахте нашите услуги!",
+    yourBookingCode: "Вашият код е:",
+
+    luxuryAndComfort: "Луксозният и комфортен",
+    perfectForBusiness: "е перфектен избор за бизнес пътувания и специални поводи.",
+
+    // Payment
+    processing: "Обработка...",
+    checking: "Проверка...",
+    checkAvailability: "ПРОВЕРИ НАЛИЧНОСТ",
+    pay: "ПЛАТИ",
+    paymentFailed: "Плащането е неуспешно",
+    paymentProcessing: "Обработка на плащането...",
+    paymentSuccessful: "Плащането е успешно",
+    paymentRequired: "Изисква се плащане",
+    paymentAmount: "Сума за плащане",
+    paymentMethod: "Начин на плащане",
+    cardNumber: "Номер на карта",
+    cardExpiry: "Валидност",
+    cardCvc: "CVC",
+    cardholderName: "Име на картодържателя",
+
+    // Payment Success
+    confirmingPayment: "Потвърждаване на плащането...",
+    paymentConfirmationFailed: "Грешка при потвърждаване на плащането",
+    stripeNotAvailable: "Системата за плащания не е налична в момента",
+    tryAgain: "ОПИТАЙ ОТНОВО",
+    bookingSuccess: "Успешна резервация!",
+    bookingConfirmationSent: "Изпратихме потвърждение за резервацията на вашия имейл.",
+    thankYouForBooking: "Благодарим ви, че избрахте нашите услуги!",
+    redirectingHome: "Ще бъдете пренасочени към началната страница след {seconds} секунди",
+    whatHappensNext: "Какво следва",
+    checkEmailStep: "Проверете имейла си за потвърждение на резервацията",
+    saveBookingCode: "Запазете кода на резервацията си",
+    contactForQuestions: "Свържете се с нас при въпроси",
+
+    // Payment confirmation
+    pleaseWait: "Моля, изчакайте...",
+    confirmingPayment: "Потвърждаване на плащането",
+    paymentFailed: "Плащането не е успешно",
+    paymentSuccessful: "Плащането е успешно",
+    paymentConfirmationFailed: "Възникна проблем при потвърждаване на плащането",
+    bookingConfirmationSent: "Изпратихме потвърждение за резервацията на вашия имейл",
+    thankYouForBooking: "Благодарим ви, че избрахте нашите услуги",
+    redirectingHome: "Ще бъдете пренасочени към началната страница след {seconds} секунди",
+    whatHappensNext: "Какво следва",
+    checkEmailStep: "Проверете имейла си за потвърждение на резервацията",
+    saveBookingCode: "Запазете кода на резервацията си",
+    contactForQuestions: "Свържете се с нас при въпроси",
+    tryAgain: "Опитайте отново",
+    contactSupportIfProblemPersists: "Ако проблемът продължава, моля свържете се с нас",
+    ...paymentTranslations.bg
   },
   en: {
     // Header
     home: "Home",
-    about: "About Us",
+    about: "About",
     cars: "Cars",
     prices: "Prices",
     monthlyOffers: "Monthly Offers",
@@ -444,6 +507,8 @@ export const translations = {
 
     // Common
     loading: "Loading...",
+    processing: "Processing...",
+    checking: "Checking...",
     seeMore: "SEE MORE",
     rent: "RENT",
     rental: "RENTAL",
@@ -456,7 +521,7 @@ export const translations = {
     saturday: "Saturday: 09:00 - 17:00",
     sunday: "Sunday: 10:00 - 16:00",
     required: "*",
-    year: "year of manufacture",
+    year: "year",
     transmission: "transmission",
     fuel: "fuel",
     doorsCount: "doors count",
@@ -468,7 +533,7 @@ export const translations = {
     totalPrice: "Total",
 
     // Homepage
-    carsForRent: "CAR RENTAL",
+    carsForRent: "Cars for Rent",
     return: "RETURN",
     pickupLocation: "Pickup Location",
     returnLocation: "Return Location",
@@ -477,9 +542,9 @@ export const translations = {
     pickupTime: "Pickup Time",
     returnTime: "Return Time",
     search: "SEARCH",
-    ourCars: "OUR RENTAL CARS",
+    ourCars: "Our Rental Cars",
     perDay: "day",
-    lightCars: "Cars",
+    lightCars: "Light Cars",
     suvs: "SUVs",
     vans: "Vans",
     seeAll: "SEE ALL",
@@ -502,13 +567,10 @@ export const translations = {
     hatchback: "Hatchback",
     coupe: "Coupe",
     all: "All",
-    bodyType: "Body Type",
-    filter: "FILTER",
-    clearAllFilters: "Clear All",
 
     // About page
     aboutTitle: "Who are we?",
-    aboutMainDescription: "AUTO RENT is a leading car rental company, offering reliable, convenient and transparent services for clients in Bulgaria. Our main mission is to provide comfortable, safe and hassle-free travel with quality vehicles, without hidden fees and with full comprehensive insurance included.",
+    aboutMainDescription: "AUTO RENT is a leading car rental company, offering reliable, convenient and transparent services for clients. Our main mission is to provide comfortable, safe and hassle-free travel with quality vehicles, without hidden fees and with full comprehensive insurance included.",
     officialRegistration: "Official Registration",
     registrationInfo: "AUTO RENT is a company registered in the commercial register as:",
     companyName: "AUTO RENT EOOD",
@@ -647,13 +709,9 @@ export const translations = {
       "We offer a wide selection of rental cars from different categories that cover a variety of needs and requirements.",
 
     // Cities
-    burgas: "Burgas",
-    pomorie: "Pomorie",
-    nessebar: "Nessebar",
     sunnyBeach: "Sunny Beach",
-    svetiVlas: "Sveti Vlas",
-    varna: "Varna",
-    goldenSands: "Golden Sands",
+    burgasAirport: "Burgas Airport",
+    varnaAirport: "Varna Airport",
     plovdiv: "Plovdiv",
     staraZagora: "Stara Zagora",
     selectCity: "Select city",
@@ -734,11 +792,12 @@ export const translations = {
     // Services page
     additionalServicesAndPrices: "Additional Services and Prices",
     convenienceServices: "Convenience Services",
-    deliveryBlackSea: "Delivery within Black Sea region",
+    deliveryBlackSea: "To pick up or return a car to a location other than those selected, please contact us at:",
     deliveryOutsideBlackSea: "Delivery outside Black Sea region",
     returnOutsideWorkingHours: "Return outside working hours",
     additionalEquipment: "Additional Equipment",
     gpsNavigation: "GPS Navigation",
+    freePrice: "Free",
 
     // How to Order Section
     howToOrderService: "How to Order a Service",
@@ -846,8 +905,8 @@ export const translations = {
     invalidPhoneFormat: "Invalid phone number. Please enter at least 10 digits in a valid format.",
 
     // Locations
-    varnaAirport: "Varna Airport",
-    burgasAirport: "Burgas Airport",
+    varnaAirportEn: "Varna Airport",
+    burgasAirportEn: "Burgas Airport",
     sunnyBeachEn: "Sunny Beach",
 
     economicCar: "ECONOMIC",
@@ -856,6 +915,68 @@ export const translations = {
 
     showMoreMobile: "Show More",
     hideAllMobile: "Hide All",
+
+    // Success page
+    bookingSuccess: "Booking Successful!",
+    bookingConfirmationSent: "We've sent a booking confirmation to your email.",
+    checkEmailForCode: "Please check your email for the booking code.",
+    redirectingHome: "You will be redirected to the homepage in {seconds} seconds",
+    whatHappensNext: "What happens next",
+    checkEmailStep: "Check your email for booking confirmation",
+    saveBookingCode: "Save your booking code",
+    contactForQuestions: "Contact us if you have any questions",
+    thankYouForBooking: "Thank you for choosing our services!",
+    yourBookingCode: "Your booking code is:",
+
+    luxuryAndComfort: "The luxurious and comfortable",
+    perfectForBusiness: "is perfect for business trips and special occasions.",
+
+    // Payment
+    processing: "Processing...",
+    checking: "Checking...",
+    checkAvailability: "CHECK AVAILABILITY",
+    pay: "PAY",
+    paymentFailed: "Payment failed",
+    paymentProcessing: "Processing payment...",
+    paymentSuccessful: "Payment successful",
+    paymentRequired: "Payment required",
+    paymentAmount: "Payment amount",
+    paymentMethod: "Payment method",
+    cardNumber: "Card number",
+    cardExpiry: "Expiry date",
+    cardCvc: "CVC",
+    cardholderName: "Cardholder name",
+
+    // Payment Success
+    confirmingPayment: "Confirming payment...",
+    paymentConfirmationFailed: "Payment confirmation failed",
+    stripeNotAvailable: "Payment system is currently unavailable",
+    tryAgain: "TRY AGAIN",
+    bookingSuccess: "Booking Successful!",
+    bookingConfirmationSent: "We've sent a booking confirmation to your email.",
+    thankYouForBooking: "Thank you for choosing our services!",
+    redirectingHome: "You will be redirected to the homepage in {seconds} seconds",
+    whatHappensNext: "What happens next",
+    checkEmailStep: "Check your email for booking confirmation",
+    saveBookingCode: "Save your booking code",
+    contactForQuestions: "Contact us if you have any questions",
+
+    // Payment confirmation
+    pleaseWait: "Please wait...",
+    confirmingPayment: "Confirming payment",
+    paymentFailed: "Payment failed",
+    paymentSuccessful: "Payment successful",
+    paymentConfirmationFailed: "There was a problem confirming your payment",
+    bookingConfirmationSent: "We've sent a booking confirmation to your email",
+    thankYouForBooking: "Thank you for choosing our services",
+    redirectingHome: "You will be redirected to the homepage in {seconds} seconds",
+    whatHappensNext: "What happens next",
+    checkEmailStep: "Check your email for booking confirmation",
+    saveBookingCode: "Save your booking code",
+    contactForQuestions: "Contact us if you have any questions",
+    tryAgain: "Try again",
+    contactSupportIfProblemPersists: "If the problem persists, please contact us",
+    ...paymentTranslations.en
   }
 } as const
 

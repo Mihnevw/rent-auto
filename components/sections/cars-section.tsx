@@ -130,14 +130,15 @@ export function CarsSection() {
             >
               <div className="mb-4">
                 <h3 className="text-base sm:text-lg font-bold text-blue-600 mb-3 sm:mb-4 line-clamp-1">{car.name}</h3>
-                <div className="relative aspect-[4/3] mb-4">
+                <div className="w-full aspect-[4/3] relative mb-4">
                   <Image
                     src={car.mainImage.startsWith('http') ? car.mainImage : `http://localhost:8800${car.mainImage}`}
                     alt={car.name}
                     fill
-                    className="object-contain"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    priority={currentPage === 1 && car === currentCars[0]}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-contain bg-white rounded-lg"
+                    loading="lazy"
+                    quality={75}
                   />
                 </div>
               </div>
@@ -154,11 +155,11 @@ export function CarsSection() {
                   </div>
                   <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                     <Car className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                    <span className="truncate">{car.bodyType}</span>
+                    <span className="truncate">{t(car.bodyType.toLowerCase() as any)}</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                     <Fuel className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                    <span className="truncate">{car.fuel}</span>
+                    <span className="truncate">{t(car.fuel.toLowerCase() as any)}</span>
                   </div>
                 </div>
               </div>

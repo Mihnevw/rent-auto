@@ -288,10 +288,19 @@ export default function SearchPage() {
                   {/* Price and Book Button */}
                   <div className="md:col-span-1 flex flex-col items-end justify-between">
                     <div className="text-right mb-4">
-                      <p className="text-2xl font-bold text-blue-600">
-                        {formatPrice(car.pricing["1_3"].toString())}
-                        <span className="text-sm font-normal text-gray-600">/{t("pricePerDay")}</span>
-                      </p>
+                      {typeof (car as any).price !== "undefined" ? (
+                        <p className="text-2xl font-bold text-blue-600">
+                          {formatPrice((car as any).price)}
+                          <span className="text-sm font-normal text-gray-600">/{t("pricePerDay")}</span>
+                        </p>
+                      ) : car.pricing && typeof car.pricing["1_3"] !== "undefined" ? (
+                        <p className="text-2xl font-bold text-blue-600">
+                          {formatPrice(car.pricing["1_3"])}
+                          <span className="text-sm font-normal text-gray-600">/{t("pricePerDay")}</span>
+                        </p>
+                      ) : (
+                        <p className="text-sm text-gray-600 italic">N/A</p>
+                      )}
                     </div>
                     <Button
                       asChild

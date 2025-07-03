@@ -1,4 +1,6 @@
+// API Configuration
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8800'
+export const STRIPE_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_live_51Rd89FBICsnfOnAlO8uT5WVNwEmmeurUNvs0nEZQkXlP2DfjTLoRTvhhWrA3bqbrox9dLbZIpWoJcdjspnTZjZCy00fSjMPcq6'
 
 export const config = {
   api: {
@@ -12,6 +14,9 @@ export const config = {
       confirmPayment: '/reservations/confirm-payment',
       contact: '/contact'
     }
+  },
+  stripe: {
+    publishableKey: STRIPE_PUBLISHABLE_KEY
   },
   images: {
     baseUrl: API_BASE_URL

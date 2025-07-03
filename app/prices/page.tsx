@@ -190,9 +190,9 @@ export default function PricesPage() {
                         className="object-contain"
                     />
                     </div>
-                    <div className="min-w-0">
-                      <span className="font-medium text-gray-900 block text-sm sm:text-base truncate">{car.name}</span>
-                      <span className="text-xs sm:text-sm text-gray-500 block truncate">{car.engine} • {car.transmission}</span>
+                    <div className="min-w-0 flex-1">
+                      <span className="font-medium text-gray-900 block text-sm sm:text-base break-words">{car.name}</span>
+                      <span className="text-xs sm:text-sm text-gray-500 block">{car.engine} • {car.transmission}</span>
                     </div>
                   </div>
 

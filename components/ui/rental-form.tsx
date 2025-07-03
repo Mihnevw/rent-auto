@@ -14,6 +14,77 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn, STORAGE_KEYS, saveToStorage, getFromStorage } from "@/lib/utils"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { buildApiUrl, config } from '@/lib/config'
+import { loadStripe } from '@stripe/stripe-js'
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
+
+// Initialize Stripe with the publishable key
+const stripePromise = loadStripe('pk_live_51Rd89FBICsnfOnAlO8uT5WVNwEmmeurUNvs0nEZQkXlP2DfjTLoRTvhhWrA3bqbrox9dLbZIpWoJcdjspnTZjZCy00fSjMPcq6');
+
+// Payment form component
+function PaymentForm({ clientSecret, onSuccess }: { clientSecret: string, onSuccess: () => void }) {
+  const stripe = useStripe()
+  const elements = useElements()
+  const [error, setError] = useState<string | null>(null)
+  const [processing, setProcessing] = useState(false)
+  const { t } = useLanguage()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!stripe || !elements) {
+      setError(t("stripeNotAvailable"))
+      return
+    }
+
+    setProcessing(true)
+    setError(null)
+
+    try {
+      const { error: paymentError } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: window.location.origin + '/booking/success'
+        }
+      })
+
+      if (paymentError) {
+        setError(paymentError.message || t("paymentFailed"))
+      } else {
+        onSuccess()
+      }
+    } catch (err) {
+      setError(t("paymentFailed"))
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  if (!stripe || !elements) {
+    return (
+      <Alert variant="destructive">
+        <AlertDescription>{t("stripeNotAvailable")}</AlertDescription>
+      </Alert>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <PaymentElement />
+      {error && (
+        <Alert variant="destructive" className="mt-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      <Button
+        type="submit"
+        className="w-full mt-4"
+        disabled={!stripe || processing}
+      >
+        {processing ? t("processing") : t("pay")}
+      </Button>
+    </form>
+  )
+}
 
 interface Location {
   _id: string
@@ -166,6 +237,8 @@ export function RentalForm({ carId, car, className }: RentalFormProps) {
   const [numberOfDays, setNumberOfDays] = useState<number | null>(null)
   const [pricePerDay, setPricePerDay] = useState<number | null>(null)
   const [needsChildSeat, setNeedsChildSeat] = useState(false)
+  const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const [showPayment, setShowPayment] = useState(false)
 
   // Load saved data from localStorage
   useEffect(() => {
@@ -321,8 +394,6 @@ export function RentalForm({ carId, car, className }: RentalFormProps) {
       const availabilityParams = {
         pickupTime: pickupDateTime,
         returnTime: returnDateTime,
-        pickupLocation,
-        returnLocation,
         ...(carId && { carId })
       }
 
@@ -352,7 +423,6 @@ export function RentalForm({ carId, car, className }: RentalFormProps) {
         phone: contactInfo.phone,
         fromDateTime: pickupDateTime,
         toDateTime: returnDateTime,
-        totalAmount: availabilityData.cars[0].price,
         additionalServices: {
           childSeat: needsChildSeat
         }
@@ -373,14 +443,19 @@ export function RentalForm({ carId, car, className }: RentalFormProps) {
         throw new Error(reservationResult.error || t("errorOccurred"))
       }
 
-      // If successful, redirect to success page with reservation details
-      router.push(`/booking/success?code=${reservationResult.code}`)
+      // Show payment form with the client secret
+      setClientSecret(reservationResult.clientSecret)
+      setShowPayment(true)
 
     } catch (err) {
       setError(err instanceof Error ? err.message : t("errorOccurred"))
     } finally {
       setIsCheckingAvailability(false)
     }
+  }
+
+  const handlePaymentSuccess = () => {
+    router.push(`/booking/success`)
   }
 
   const handlePickupDateChange = (date: Date | undefined) => {
@@ -459,256 +534,267 @@ export function RentalForm({ carId, car, className }: RentalFormProps) {
 
   return (
     <div className="bg-white rounded-lg p-6 shadow-sm">
-      <h3 className="text-xl font-bold text-gray-800 mb-6">{carId ? t("reservationDetails") : t("detailsForRental")}</h3>
+      {!showPayment ? (
+        <>
+          <h3 className="text-xl font-bold text-gray-800 mb-6">{carId ? t("reservationDetails") : t("detailsForRental")}</h3>
 
-      {error && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertDescription>{error}</AlertDescription>
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Pickup Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{t("pickupDetails")}</h3>
+
+            <div className="space-y-4">
+              {/* Pickup Location */}
+              <div>
+                <Label className="text-sm text-gray-600 mb-2 block">{t("pickupLocation")}</Label>
+                <Select value={pickupLocation} onValueChange={handlePickupLocationChange}>
+                  <SelectTrigger className="w-full h-12 rounded-lg border-gray-200 text-gray-500">
+                    <SelectValue placeholder={isLoading ? t("loading") : t("selectCity")} />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {locations.filter(loc => loc.isActive).map((location) => (
+                      <SelectItem key={location._id} value={location._id}>
+                        {getLocationDisplayName(location)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Pickup Date and Time */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm text-gray-600 mb-2 block">{t("pickupDate")}</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full h-12 justify-start text-left font-normal rounded-lg border-gray-200",
+                          !pickupDate && "text-gray-500"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {pickupDate ? format(pickupDate, "dd.MM.yyyy") : <span>{t("selectDate")}</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={pickupDate}
+                        onSelect={handlePickupDateChange}
+                        disabled={isDateDisabled}
+                        modifiers={modifiers}
+                        modifiersStyles={modifiersStyles}
+                        modifiersClassNames={modifiersClassNames}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <TimeInput
+                  value={pickupTime}
+                  onChange={setPickupTime}
+                  label={t("pickupTime")}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Return Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{t("returnDetails")}</h3>
+
+            <div className="space-y-4">
+              {/* Return Location */}
+              <div>
+                <Label className="text-sm text-gray-600 mb-2 block">{t("returnLocation")}</Label>
+                <Select value={returnLocation} onValueChange={setReturnLocation}>
+                  <SelectTrigger className="w-full h-12 rounded-lg border-gray-200 text-gray-500">
+                    <SelectValue placeholder={isLoading ? t("loading") : t("selectCity")} />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[300px]">
+                    {locations.filter(loc => loc.isActive).map((location) => (
+                      <SelectItem key={location._id} value={location._id}>
+                        {getLocationDisplayName(location)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Return Date and Time */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm text-gray-600 mb-2 block">{t("returnDate")}</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full h-12 justify-start text-left font-normal rounded-lg border-gray-200",
+                          !returnDate && "text-gray-500"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {returnDate ? format(returnDate, "dd.MM.yyyy") : <span>{t("selectDate")}</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={returnDate}
+                        onSelect={setReturnDate}
+                        disabled={(date) => isDateDisabled(date) || (pickupDate ? isBefore(date, pickupDate) : false)}
+                        modifiers={modifiers}
+                        modifiersStyles={modifiersStyles}
+                        modifiersClassNames={modifiersClassNames}
+                        initialFocus
+                        fromDate={pickupDate}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <TimeInput
+                  value={returnTime}
+                  onChange={setReturnTime}
+                  label={t("returnTime")}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Contact Information Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{t("customerDetails")}</h3>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm text-gray-600 mb-2 block">{t("fullName")}</Label>
+                <Input
+                  type="text"
+                  value={contactInfo.name}
+                  onChange={handleContactInfoChange('name')}
+                  className={cn(
+                    "w-full h-12 rounded-lg",
+                    validationErrors.name && "border-red-500"
+                  )}
+                  placeholder={t("enterFullName")}
+                />
+                {validationErrors.name && (
+                  <p className="text-sm text-red-500 mt-1">{validationErrors.name}</p>
+                )}
+              </div>
+
+              <div>
+                <Label className="text-sm text-gray-600 mb-2 block">{t("email")}</Label>
+                <Input
+                  type="email"
+                  value={contactInfo.email}
+                  onChange={handleContactInfoChange('email')}
+                  className={cn(
+                    "w-full h-12 rounded-lg",
+                    validationErrors.email && "border-red-500"
+                  )}
+                  placeholder={t("enterEmail")}
+                />
+                {validationErrors.email && (
+                  <p className="text-sm text-red-500 mt-1">{validationErrors.email}</p>
+                )}
+              </div>
+
+              <div>
+                <Label className="text-sm text-gray-600 mb-2 block">{t("phone")}</Label>
+                <Input
+                  type="tel"
+                  value={contactInfo.phone}
+                  onChange={handleContactInfoChange('phone')}
+                  className={cn(
+                    "w-full h-12 rounded-lg",
+                    validationErrors.phone && "border-red-500"
+                  )}
+                  placeholder={t("enterPhone")}
+                />
+                {validationErrors.phone && (
+                  <p className="text-sm text-red-500 mt-1">{validationErrors.phone}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Additional Services Section */}
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">{t("additionalServices")}</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
+                <div>
+                  <p className="font-medium text-gray-800">{t("childSeat")}</p>
+                  <p className="text-sm text-gray-600">{t("free")}</p>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="childSeat"
+                    checked={needsChildSeat}
+                    onChange={(e) => setNeedsChildSeat(e.target.checked)}
+                    className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <Label htmlFor="childSeat" className="ml-2 text-sm text-gray-600">
+                    {t("include")}
+                  </Label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Price Summary Section */}
+          {totalAmount !== null && numberOfDays !== null && pricePerDay !== null && (
+            <div className="mb-6 bg-gray-50 rounded-lg p-4">
+              <h3 className="text-lg font-bold text-gray-800 mb-4">{t("priceBreakdown")}</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span>{t("numberOfDays")}:</span>
+                  <span className="font-semibold">{numberOfDays}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>{t("pricePerDay")}:</span>
+                  <span className="font-semibold">{formatPrice(pricePerDay.toString())}</span>
+                </div>
+                {needsChildSeat && (
+                  <div className="flex justify-between text-sm">
+                    <span>{t("childSeat")}:</span>
+                    <span className="font-semibold text-green-600">{t("free")}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-base font-bold pt-2 border-t">
+                  <span>{t("totalPrice")}:</span>
+                  <span>{formatPrice(totalAmount.toString())}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <Button
+            onClick={handleSearch}
+            className="w-full mt-6"
+            disabled={isCheckingAvailability}
+          >
+            {isCheckingAvailability ? t("checking") : t("checkAvailability")}
+          </Button>
+        </>
+      ) : clientSecret && stripePromise ? (
+        <Elements stripe={stripePromise} options={{ clientSecret }}>
+          <PaymentForm clientSecret={clientSecret} onSuccess={handlePaymentSuccess} />
+        </Elements>
+      ) : (
+        <Alert variant="destructive">
+          <AlertDescription>{t("stripeNotAvailable")}</AlertDescription>
         </Alert>
       )}
-
-      {/* Pickup Section */}
-      <div className="mb-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-4">{t("pickupDetails")}</h3>
-
-        <div className="space-y-4">
-          {/* Pickup Location */}
-          <div>
-            <Label className="text-sm text-gray-600 mb-2 block">{t("pickupLocation")}</Label>
-            <Select value={pickupLocation} onValueChange={handlePickupLocationChange}>
-              <SelectTrigger className="w-full h-12 rounded-lg border-gray-200 text-gray-500">
-                <SelectValue placeholder={isLoading ? t("loading") : t("selectCity")} />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                {locations.filter(loc => loc.isActive).map((location) => (
-                  <SelectItem key={location._id} value={location._id}>
-                    {getLocationDisplayName(location)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Pickup Date and Time */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-sm text-gray-600 mb-2 block">{t("pickupDate")}</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full h-12 justify-start text-left font-normal rounded-lg border-gray-200",
-                      !pickupDate && "text-gray-500"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {pickupDate ? format(pickupDate, "dd.MM.yyyy") : <span>{t("selectDate")}</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={pickupDate}
-                    onSelect={handlePickupDateChange}
-                    disabled={isDateDisabled}
-                    modifiers={modifiers}
-                    modifiersStyles={modifiersStyles}
-                    modifiersClassNames={modifiersClassNames}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <TimeInput
-              value={pickupTime}
-              onChange={setPickupTime}
-              label={t("pickupTime")}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Return Section */}
-      <div className="mb-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-4">{t("returnDetails")}</h3>
-
-        <div className="space-y-4">
-          {/* Return Location */}
-          <div>
-            <Label className="text-sm text-gray-600 mb-2 block">{t("returnLocation")}</Label>
-            <Select value={returnLocation} onValueChange={setReturnLocation}>
-              <SelectTrigger className="w-full h-12 rounded-lg border-gray-200 text-gray-500">
-                <SelectValue placeholder={isLoading ? t("loading") : t("selectCity")} />
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                {locations.filter(loc => loc.isActive).map((location) => (
-                  <SelectItem key={location._id} value={location._id}>
-                    {getLocationDisplayName(location)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Return Date and Time */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-sm text-gray-600 mb-2 block">{t("returnDate")}</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "w-full h-12 justify-start text-left font-normal rounded-lg border-gray-200",
-                      !returnDate && "text-gray-500"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {returnDate ? format(returnDate, "dd.MM.yyyy") : <span>{t("selectDate")}</span>}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={returnDate}
-                    onSelect={setReturnDate}
-                    disabled={(date) => isDateDisabled(date) || (pickupDate ? isBefore(date, pickupDate) : false)}
-                    modifiers={modifiers}
-                    modifiersStyles={modifiersStyles}
-                    modifiersClassNames={modifiersClassNames}
-                    initialFocus
-                    fromDate={pickupDate}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <TimeInput
-              value={returnTime}
-              onChange={setReturnTime}
-              label={t("returnTime")}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Contact Information Section */}
-      <div className="mb-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-4">{t("customerDetails")}</h3>
-        <div className="space-y-4">
-          <div>
-            <Label className="text-sm text-gray-600 mb-2 block">{t("fullName")}</Label>
-            <Input
-              type="text"
-              value={contactInfo.name}
-              onChange={handleContactInfoChange('name')}
-              className={cn(
-                "w-full h-12 rounded-lg",
-                validationErrors.name && "border-red-500"
-              )}
-              placeholder={t("enterFullName")}
-            />
-            {validationErrors.name && (
-              <p className="text-sm text-red-500 mt-1">{validationErrors.name}</p>
-            )}
-          </div>
-
-          <div>
-            <Label className="text-sm text-gray-600 mb-2 block">{t("email")}</Label>
-            <Input
-              type="email"
-              value={contactInfo.email}
-              onChange={handleContactInfoChange('email')}
-              className={cn(
-                "w-full h-12 rounded-lg",
-                validationErrors.email && "border-red-500"
-              )}
-              placeholder={t("enterEmail")}
-            />
-            {validationErrors.email && (
-              <p className="text-sm text-red-500 mt-1">{validationErrors.email}</p>
-            )}
-          </div>
-
-          <div>
-            <Label className="text-sm text-gray-600 mb-2 block">{t("phone")}</Label>
-            <Input
-              type="tel"
-              value={contactInfo.phone}
-              onChange={handleContactInfoChange('phone')}
-              className={cn(
-                "w-full h-12 rounded-lg",
-                validationErrors.phone && "border-red-500"
-              )}
-              placeholder={t("enterPhone")}
-            />
-            {validationErrors.phone && (
-              <p className="text-sm text-red-500 mt-1">{validationErrors.phone}</p>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Additional Services Section */}
-      <div className="mb-6">
-        <h3 className="text-lg font-bold text-gray-800 mb-4">{t("additionalServices")}</h3>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between bg-gray-50 p-4 rounded-lg">
-            <div>
-              <p className="font-medium text-gray-800">{t("childSeat")}</p>
-              <p className="text-sm text-gray-600">{t("free")}</p>
-            </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="childSeat"
-                checked={needsChildSeat}
-                onChange={(e) => setNeedsChildSeat(e.target.checked)}
-                className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <Label htmlFor="childSeat" className="ml-2 text-sm text-gray-600">
-                {t("include")}
-              </Label>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Price Summary Section */}
-      {totalAmount !== null && numberOfDays !== null && pricePerDay !== null && (
-        <div className="mb-6 bg-gray-50 rounded-lg p-4">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">{t("priceBreakdown")}</h3>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span>{t("numberOfDays")}:</span>
-              <span className="font-semibold">{numberOfDays}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>{t("pricePerDay")}:</span>
-              <span className="font-semibold">{formatPrice(pricePerDay.toString())}</span>
-            </div>
-            {needsChildSeat && (
-              <div className="flex justify-between text-sm">
-                <span>{t("childSeat")}:</span>
-                <span className="font-semibold text-green-600">{t("free")}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-base font-bold pt-2 border-t">
-              <span>{t("totalPrice")}:</span>
-              <span>{formatPrice(totalAmount.toString())}</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Submit Button */}
-      <Button
-        className="w-full bg-orange-400 hover:bg-orange-500 text-white font-bold py-4 rounded-lg text-lg transition-colors"
-        disabled={!pickupDate || !returnDate || !pickupLocation || !returnLocation || isLoading || isCheckingAvailability}
-        onClick={handleSearch}
-      >
-        {isCheckingAvailability ? t("processing") : (isLoading ? t("loading") : t("confirmBooking"))}
-      </Button>
     </div>
   )
 } 

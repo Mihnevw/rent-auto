@@ -28,12 +28,8 @@ export default function AboutPage() {
       },
       "areaServed": [
         "Sunny Beach",
-        "Burgas",
-        "Nessebar",
-        "Varna",
-        "Pomorie",
-        "St. Vlas",
-        "Golden Sands"
+        "Burgas Airport",
+        "Varna Airport"
       ]
     }
   }
@@ -45,27 +41,11 @@ export default function AboutPage() {
     },
     {
       icon: <CheckCircle className="w-5 h-5 text-emerald-500" />,
-      key: "burgas"
+      key: "burgasAirport"
     },
     {
       icon: <CheckCircle className="w-5 h-5 text-emerald-500" />,
-      key: "nessebar"
-    },
-    {
-      icon: <CheckCircle className="w-5 h-5 text-emerald-500" />,
-      key: "varna"
-    },
-    {
-      icon: <CheckCircle className="w-5 h-5 text-emerald-500" />,
-      key: "pomorie"
-    },
-    {
-      icon: <CheckCircle className="w-5 h-5 text-emerald-500" />,
-      key: "svetiVlas"
-    },
-    {
-      icon: <CheckCircle className="w-5 h-5 text-emerald-500" />,
-      key: "goldenSands"
+      key: "varnaAirport"
     }
   ]
 
@@ -122,10 +102,10 @@ export default function AboutPage() {
                       <div className="space-y-2 text-slate-600">
                         <p>{t("registrationInfo")}</p>
                         <p className="font-bold text-slate-800 text-lg">{t("companyName")}</p>
-                        <address className="flex items-center gap-2 not-italic">
+                        {/* <address className="flex items-center gap-2 not-italic">
                           <MapPin className="w-4 h-4 text-red-500" />
                           {t("companyAddress")}
-                        </address>
+                        </address> */}
                       </div>
                     </div>
                   </div>

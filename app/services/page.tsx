@@ -138,8 +138,7 @@ export default function ServicesPage() {
                 <h3 className="text-xl font-bold text-gray-800 mb-4">{t("servicesTitle")}</h3>
                 <dl className="space-y-3">
                   <div className="flex justify-between items-center border-b pb-2">
-                    <dt className="text-gray-700">{t("deliveryBlackSea")}</dt>
-                    <dd className="font-semibold text-gray-800">{formatPrice(20)}</dd>
+                    <dt className="text-gray-700">{t("deliveryBlackSea")} <a href="tel:+359894818283" className="text-blue-600 hover:text-blue-800">0894818283</a></dt>
                   </div>
                   {/* <div className="flex justify-between items-center border-b pb-2">
                     <dt className="text-gray-700">{t("deliveryOutsideBlackSea")}</dt>
@@ -157,7 +156,7 @@ export default function ServicesPage() {
                 <dl className="space-y-3">
                   <div className="flex justify-between items-center border-b pb-2">
                     <dt className="text-gray-700">{t("childSeat")}</dt>
-                    <dd className="font-semibold text-gray-800">{formatPrice(0)}/{t("perDay")}</dd>
+                    <dd className="font-semibold text-green-600">{t("freePrice")}</dd>
                   </div>
                   {/* <div className="flex justify-between items-center border-b pb-2">
                     <dt className="text-gray-700">{t("gps")}</dt>
@@ -204,7 +203,7 @@ export default function ServicesPage() {
                   <li>{t("deliveryTime")}</li>
                   <li>{t("emergencyService")}</li>
                   <li>{t("advanceBooking")}</li>
-                  <li>{t("paymentOnDelivery")}</li>
+                  {/* <li>{t("paymentOnDelivery")}</li> */}
                 </ul>
               </div>
             </div>

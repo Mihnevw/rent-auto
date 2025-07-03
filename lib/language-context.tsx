@@ -53,8 +53,9 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }
 
   const t = (key: TranslationKey): string => {
-    const currentTranslations = translations[language] as Record<TranslationKey, string>
-    const fallbackTranslations = translations.bg as Record<TranslationKey, string>
+    // Cast to any first to bypass type checking, then to the desired type
+    const currentTranslations = translations[language] as any as Record<string, string>
+    const fallbackTranslations = translations.bg as any as Record<string, string>
     
     const translation = currentTranslations?.[key] ?? fallbackTranslations[key]
     return translation || key
@@ -62,22 +63,16 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const formatPrice = (price: number | string): string => {
     if (price === null || price === undefined) {
-      return language === "en" ? "€0.00" : "0.00лв."
+      return "€0.00"
     }
 
-    const numPrice =
-      typeof price === "string" ? Number.parseFloat(price) : price
+    const numPrice = typeof price === "string" ? Number.parseFloat(price) : price
 
     if (Number.isNaN(numPrice)) {
-      return language === "en" ? "€0.00" : "0.00лв."
+      return "€0.00"
     }
 
-    if (language === "en") {
-      const eurPrice = (numPrice * BGN_TO_EUR_RATE).toFixed(2)
-      return `€${eurPrice}`
-    } else {
-      return `${numPrice.toFixed(2)}лв.`
-    }
+    return `€${numPrice.toFixed(2)}`
   }
 
   return (

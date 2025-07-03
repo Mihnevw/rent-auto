@@ -193,10 +193,30 @@ export default function CarsPage() {
   const [visibleCarsOnMobile, setVisibleCarsOnMobile] = useState(4)
   const isMobile = useMobile()
 
+  // Filter cars based on selected criteria
+  const filteredCars = cars.filter((car) => {
+    // Fuel type filtering
+    const fuelMatch =
+      (!filters.diesel && !filters.gasoline) || // No fuel filter selected
+      (filters.diesel && car.fuel.toLowerCase().includes("diesel")) ||
+      (filters.gasoline && car.fuel.toLowerCase().includes("gasoline"))
+
+    // Transmission filtering
+    const transmissionMatch =
+      (!filters.automatic && !filters.manual) || // No transmission filter selected
+      (filters.automatic && car.transmission.toLowerCase() === "automatic") ||
+      (filters.manual && car.transmission.toLowerCase() === "manual")
+
+    // Body type filtering
+    const bodyTypeMatch = bodyType === "all" || car.bodyType.toLowerCase() === bodyType.toLowerCase()
+
+    return fuelMatch && transmissionMatch && bodyTypeMatch
+  })
+
   // Get visible cars based on device
   const displayedCars = isMobile 
-    ? cars.slice(0, visibleCarsOnMobile)
-    : cars
+    ? filteredCars.slice(0, visibleCarsOnMobile)
+    : filteredCars
 
   // Load saved data from localStorage
   useEffect(() => {
@@ -329,30 +349,13 @@ export default function CarsPage() {
     }
   }
 
-  // Filter cars based on selected criteria
-  const filteredCars = cars.filter((car) => {
-    // Fuel type filtering
-    const fuelMatch =
-      (!filters.diesel && !filters.gasoline) || // No fuel filter selected
-      (filters.diesel && car.fuel.toLowerCase() === "diesel") ||
-      (filters.gasoline && car.fuel.toLowerCase() === "gasoline")
-
-    // Transmission filtering
-    const transmissionMatch =
-      (!filters.automatic && !filters.manual) || // No transmission filter selected
-      (filters.automatic && car.transmission.toLowerCase() === "automatic") ||
-      (filters.manual && car.transmission.toLowerCase() === "manual")
-
-    // Body type filtering
-    const bodyTypeMatch = bodyType === "all" || car.bodyType.toLowerCase() === bodyType.toLowerCase()
-
-    return fuelMatch && transmissionMatch && bodyTypeMatch
-  })
-
   const handleFilterChange = (filterType: string, checked: boolean) => {
     setFilters((prev) => ({
       ...prev,
       [filterType]: checked,
+      // Reset opposite transmission when one is selected
+      ...(filterType === "automatic" && checked ? { manual: false } : {}),
+      ...(filterType === "manual" && checked ? { automatic: false } : {})
     }))
   }
 
