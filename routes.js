@@ -24,7 +24,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Authentication routes
-router.post('/register', authController.register);
+//router.post('/register', authController.register);
 router.post('/login', authController.login);
 router.get('/verify', authenticate, authController.verify);
 
