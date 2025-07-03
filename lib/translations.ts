@@ -167,9 +167,9 @@ export const translations = {
     carsPageDescription:
       "Автомобили от висок клас, предлагащи съчетание от комфорт, дизайн и мощност. Разгледайте моделите, които са налични. AUTO RENT Ви пожелава приятно и безаварийно пътуване.",
     filter: "ФИЛТЪР",
+    clearAllFilters: "Изчисти всички",
     bodyType: "Купе",
     selectOption: "Изберете",
-    clearAllFilters: "Изчисти всички",
     showingCars: "Показани са",
     ofCars: "от",
     carsForPeriod: "автомобила за периода",
@@ -204,7 +204,6 @@ export const translations = {
     total: "Общо:",
     needHelp: "Нужда от помощ?",
     pleaseAcceptTerms: "Моля, приемете общите условия",
-    processing: "Обработка...",
 
     // Footer sections
     aboutUs: "ЗА НАС",
@@ -384,7 +383,6 @@ export const translations = {
     pricePerDayShort: "на ден",
     carYear: "Година",
     selectedDatesUnavailable: "Избраните дати не са налични",
-    checking: "Проверка...",
     fullyBooked: "Напълно заета",
     partiallyAvailable: "Частично свободна",
     fullyAvailable: "Напълно свободна",
@@ -434,65 +432,17 @@ export const translations = {
 
     // Success page
     bookingSuccess: "Успешна резервация!",
-    bookingConfirmationSent: "Изпратихме потвърждение за резервацията на вашия имейл.",
     checkEmailForCode: "Моля, проверете вашия имейл за код на резервацията.",
-    redirectingHome: "Ще бъдете пренасочени към началната страница след {seconds} секунди",
-    whatHappensNext: "Какво следва",
-    checkEmailStep: "Проверете имейла си за потвърждение на резервацията",
     saveBookingCode: "Запазете кода на резервацията си",
     contactForQuestions: "Свържете се с нас при въпроси",
-    thankYouForBooking: "Благодарим ви, че избрахте нашите услуги!",
     yourBookingCode: "Вашият код е:",
 
     luxuryAndComfort: "Луксозният и комфортен",
     perfectForBusiness: "е перфектен избор за бизнес пътувания и специални поводи.",
 
     // Payment
-    processing: "Обработка...",
-    checking: "Проверка...",
-    checkAvailability: "ПРОВЕРИ НАЛИЧНОСТ",
-    pay: "ПЛАТИ",
-    paymentFailed: "Плащането е неуспешно",
-    paymentProcessing: "Обработка на плащането...",
-    paymentSuccessful: "Плащането е успешно",
-    paymentRequired: "Изисква се плащане",
-    paymentAmount: "Сума за плащане",
-    paymentMethod: "Начин на плащане",
-    cardNumber: "Номер на карта",
-    cardExpiry: "Валидност",
-    cardCvc: "CVC",
-    cardholderName: "Име на картодържателя",
-
-    // Payment Success
-    confirmingPayment: "Потвърждаване на плащането...",
-    paymentConfirmationFailed: "Грешка при потвърждаване на плащането",
-    stripeNotAvailable: "Системата за плащания не е налична в момента",
-    tryAgain: "ОПИТАЙ ОТНОВО",
-    bookingSuccess: "Успешна резервация!",
-    bookingConfirmationSent: "Изпратихме потвърждение за резервацията на вашия имейл.",
-    thankYouForBooking: "Благодарим ви, че избрахте нашите услуги!",
-    redirectingHome: "Ще бъдете пренасочени към началната страница след {seconds} секунди",
-    whatHappensNext: "Какво следва",
-    checkEmailStep: "Проверете имейла си за потвърждение на резервацията",
-    saveBookingCode: "Запазете кода на резервацията си",
-    contactForQuestions: "Свържете се с нас при въпроси",
-
-    // Payment confirmation
-    pleaseWait: "Моля, изчакайте...",
-    confirmingPayment: "Потвърждаване на плащането",
-    paymentFailed: "Плащането не е успешно",
-    paymentSuccessful: "Плащането е успешно",
-    paymentConfirmationFailed: "Възникна проблем при потвърждаване на плащането",
-    bookingConfirmationSent: "Изпратихме потвърждение за резервацията на вашия имейл",
-    thankYouForBooking: "Благодарим ви, че избрахте нашите услуги",
-    redirectingHome: "Ще бъдете пренасочени към началната страница след {seconds} секунди",
-    whatHappensNext: "Какво следва",
-    checkEmailStep: "Проверете имейла си за потвърждение на резервацията",
-    saveBookingCode: "Запазете кода на резервацията си",
-    contactForQuestions: "Свържете се с нас при въпроси",
-    tryAgain: "Опитайте отново",
-    contactSupportIfProblemPersists: "Ако проблемът продължава, моля свържете се с нас",
-    ...paymentTranslations.bg
+    pay: "Плащане",
+    checkAvailability: "Проверка за наличност"
   },
   en: {
     // Header
@@ -508,7 +458,6 @@ export const translations = {
     // Common
     loading: "Loading...",
     processing: "Processing...",
-    checking: "Checking...",
     seeMore: "SEE MORE",
     rent: "RENT",
     rental: "RENTAL",
@@ -656,6 +605,9 @@ export const translations = {
 
     // Cars page
     carsPageDescription: "High-class cars offering a combination of comfort, design and power. Browse the available models. AUTO RENT wishes you a pleasant and accident-free journey.",
+    filter: "FILTER",
+    clearAllFilters: "Clear all",
+    bodyType: "Body Type",
     selectOption: "Select",
     showingCars: "Showing",
     ofCars: "of",
@@ -691,7 +643,6 @@ export const translations = {
     total: "Total:",
     needHelp: "Need help?",
     pleaseAcceptTerms: "Please accept the terms and conditions",
-    processing: "Processing...",
 
     // Footer sections
     aboutUs: "ABOUT US",
@@ -871,7 +822,6 @@ export const translations = {
     pricePerDayShort: "per day",
     carYear: "Year",
     selectedDatesUnavailable: "Selected dates are unavailable",
-    checking: "Checking...",
     fullyBooked: "Fully Booked",
     partiallyAvailable: "Partially Available",
     fullyAvailable: "Fully Available",
@@ -918,65 +868,17 @@ export const translations = {
 
     // Success page
     bookingSuccess: "Booking Successful!",
-    bookingConfirmationSent: "We've sent a booking confirmation to your email.",
     checkEmailForCode: "Please check your email for the booking code.",
-    redirectingHome: "You will be redirected to the homepage in {seconds} seconds",
-    whatHappensNext: "What happens next",
-    checkEmailStep: "Check your email for booking confirmation",
     saveBookingCode: "Save your booking code",
     contactForQuestions: "Contact us if you have any questions",
-    thankYouForBooking: "Thank you for choosing our services!",
     yourBookingCode: "Your booking code is:",
 
     luxuryAndComfort: "The luxurious and comfortable",
     perfectForBusiness: "is perfect for business trips and special occasions.",
 
     // Payment
-    processing: "Processing...",
-    checking: "Checking...",
-    checkAvailability: "CHECK AVAILABILITY",
-    pay: "PAY",
-    paymentFailed: "Payment failed",
-    paymentProcessing: "Processing payment...",
-    paymentSuccessful: "Payment successful",
-    paymentRequired: "Payment required",
-    paymentAmount: "Payment amount",
-    paymentMethod: "Payment method",
-    cardNumber: "Card number",
-    cardExpiry: "Expiry date",
-    cardCvc: "CVC",
-    cardholderName: "Cardholder name",
-
-    // Payment Success
-    confirmingPayment: "Confirming payment...",
-    paymentConfirmationFailed: "Payment confirmation failed",
-    stripeNotAvailable: "Payment system is currently unavailable",
-    tryAgain: "TRY AGAIN",
-    bookingSuccess: "Booking Successful!",
-    bookingConfirmationSent: "We've sent a booking confirmation to your email.",
-    thankYouForBooking: "Thank you for choosing our services!",
-    redirectingHome: "You will be redirected to the homepage in {seconds} seconds",
-    whatHappensNext: "What happens next",
-    checkEmailStep: "Check your email for booking confirmation",
-    saveBookingCode: "Save your booking code",
-    contactForQuestions: "Contact us if you have any questions",
-
-    // Payment confirmation
-    pleaseWait: "Please wait...",
-    confirmingPayment: "Confirming payment",
-    paymentFailed: "Payment failed",
-    paymentSuccessful: "Payment successful",
-    paymentConfirmationFailed: "There was a problem confirming your payment",
-    bookingConfirmationSent: "We've sent a booking confirmation to your email",
-    thankYouForBooking: "Thank you for choosing our services",
-    redirectingHome: "You will be redirected to the homepage in {seconds} seconds",
-    whatHappensNext: "What happens next",
-    checkEmailStep: "Check your email for booking confirmation",
-    saveBookingCode: "Save your booking code",
-    contactForQuestions: "Contact us if you have any questions",
-    tryAgain: "Try again",
-    contactSupportIfProblemPersists: "If the problem persists, please contact us",
-    ...paymentTranslations.en
+    pay: "Pay",
+    checkAvailability: "Check Availability"
   }
 } as const
 

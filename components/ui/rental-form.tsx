@@ -780,7 +780,7 @@ export function RentalForm({ carId, car, className }: RentalFormProps) {
 
           <Button
             onClick={handleSearch}
-            className="w-full mt-6"
+            className="w-full mt-6 bg-orange-500 hover:bg-orange-600 text-white"
             disabled={isCheckingAvailability}
           >
             {isCheckingAvailability ? t("checking") : t("checkAvailability")}

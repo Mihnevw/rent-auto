@@ -770,8 +770,8 @@ export default function CarsPage() {
                 </>
               ) : (
                 <div className="text-center py-12">
-                  <div className="text-gray-500 text-lg mb-4">Няма автомобили, отговарящи на избраните критерии</div>
-                  <p className="text-gray-400">Моля, променете филтрите или се свържете с нас за повече опции</p>
+                  <div className="text-gray-500 text-lg mb-4">{t("noCarsMatchingCriteria")}</div>
+                  <p className="text-gray-400">{t("changeFiltersOrContact")}</p>
                 </div>
               )}
             </div>
