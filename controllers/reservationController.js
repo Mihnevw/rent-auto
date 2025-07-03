@@ -306,6 +306,17 @@ exports.searchAvailableCars = async (req, res) => {
                 model: car.model,
                 currentLocation: car.currentLocation,
                 mainImage: car.mainImage,
+                thumbnails: car.thumbnails,
+                engine: car.engine,
+                fuel: car.fuel,
+                transmission: car.transmission,
+                seats: car.seats,
+                doors: car.doors,
+                year: car.year,
+                consumption: car.consumption,
+                bodyType: car.bodyType,
+                priceIncludes: car.priceIncludes,
+                features: car.features,
                 pricing: car.pricing,
                 price: car.pricing?.["1_3"] || 0 // direct convenience field
             }))
@@ -415,4 +426,36 @@ exports.getCarAvailability = async (req, res) => {
             error: 'Възникна грешка при проверката на наличността'
         });
     }
+};
+
+// === Admin CRUD helpers ===
+
+exports.updateReservation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const updated = await Reservation.findByIdAndUpdate(id, updates, { new: true });
+    if (!updated) {
+      return res.status(404).json({ error: 'Reservation not found' });
+    }
+    res.json(updated);
+  } catch (err) {
+    console.error('Error updating reservation:', err);
+    res.status(400).json({ error: err.message });
+  }
+};
+
+exports.deleteReservation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Reservation.findByIdAndDelete(id);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Reservation not found' });
+    }
+    res.json({ message: 'Reservation deleted' });
+  } catch (err) {
+    console.error('Error deleting reservation:', err);
+    res.status(500).json({ error: err.message });
+  }
 };
