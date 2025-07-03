@@ -410,13 +410,14 @@ export const translations = {
     invalidPhone: "Моля, въведете валиден телефонен номер",
     bookingDetails: "Детайли за резервацията",
 
-    // Error messages
-    failedToCreateReservation: "Неуспешно създаване на резервация",
-
     // Form validation
     error: "Грешка",
     invalidEmailFormat: "Моля, използвайте валиден имейл адрес.",
     invalidPhoneFormat: "Невалиден телефонен номер. Моля, въведете поне 10 цифри в правилен формат.",
+
+    // Error messages
+    failedToCreateReservation: "Неуспешно създаване на резервация",
+    carAlreadyReserved: "Автомобилът вече е резервиран за този период",
 
     // Locations
     varnaAirportBg: "Летище Варна",
@@ -442,7 +443,10 @@ export const translations = {
 
     // Payment
     pay: "Плащане",
-    checkAvailability: "Проверка за наличност"
+    checkAvailability: "Проверка за наличност",
+    stripeNotAvailable: "Системата за плащания не е налична в момента",
+    paymentFailed: "Плащането е неуспешно",
+
   },
   en: {
     // Header
@@ -458,6 +462,7 @@ export const translations = {
     // Common
     loading: "Loading...",
     processing: "Processing...",
+    checking: "Checking...",
     seeMore: "SEE MORE",
     rent: "RENT",
     rental: "RENTAL",
@@ -854,6 +859,10 @@ export const translations = {
     invalidEmailFormat: "Please use a valid email address.",
     invalidPhoneFormat: "Invalid phone number. Please enter at least 10 digits in a valid format.",
 
+    // Error messages
+    failedToCreateReservation: "Failed to create reservation",
+    carAlreadyReserved: "Car is already reserved for this period",
+
     // Locations
     varnaAirportEn: "Varna Airport",
     burgasAirportEn: "Burgas Airport",
@@ -878,7 +887,10 @@ export const translations = {
 
     // Payment
     pay: "Pay",
-    checkAvailability: "Check Availability"
+    checkAvailability: "Check Availability",
+    stripeNotAvailable: "Payment system is currently unavailable",
+    paymentFailed: "Payment failed",
+
   }
 } as const
 

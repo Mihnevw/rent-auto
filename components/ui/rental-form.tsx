@@ -448,7 +448,19 @@ export function RentalForm({ carId, car, className }: RentalFormProps) {
       setShowPayment(true)
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("errorOccurred"))
+      const errorMessage = err instanceof Error ? err.message : t("errorOccurred")
+      
+      // Translate specific error messages
+      let translatedError = errorMessage
+      if (errorMessage.includes("Car is already reserved for this period")) {
+        translatedError = t("carAlreadyReserved")
+      } else if (errorMessage.includes("Failed to check availability")) {
+        translatedError = t("failedToCheckAvailability")
+      } else if (errorMessage.includes("No cars available")) {
+        translatedError = t("noAvailableCars")
+      }
+      
+      setError(translatedError)
     } finally {
       setIsCheckingAvailability(false)
     }
