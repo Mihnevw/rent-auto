@@ -13,13 +13,14 @@ const reservationSchema = new mongoose.Schema({
     phone: { type: String, required: true },
     fromDateTime: { type: String, required: true },
     toDateTime: { type: String, required: true },
-    code: { type: String, required: true },
-    paymentStatus: { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending' },
-    paymentIntentId: { type: String },
     totalAmount: { type: Number, required: true },
+    paymentStatus: { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending' },
+    code: { type: String, required: true, unique: true },
     additionalServices: {
         childSeat: { type: Boolean, default: false }
     }
+}, {
+    timestamps: true
 });
 
 const Reservation = mongoose.model('Reservation', reservationSchema);

@@ -1,8 +1,9 @@
 const Car = require('../models/carModel');
 const Reservation = require('../models/reservationModel');
+const PendingReservation = require('../models/pendingReservationModel');
 const { isCarAvailable, addReservation, getAllReservations, convertToDateTime } = require('../services/reservationService');
-// const { createPaymentIntent, confirmPayment } = require('../services/paymentService');
-// const { sendPaymentConfirmation } = require('../services/emailService');
+const { createPaymentIntent, confirmPayment } = require('../services/paymentService');
+const { sendPaymentConfirmation, sendReservationConfirmation } = require('../services/emailService');
 
 exports.getCars = async (req, res) => {
     try {
@@ -24,7 +25,7 @@ exports.getReservations = async (req, res) => {
 
 exports.createReservation = async (req, res) => {
     const { carId, fromDate, toDate, fromTime, toTime, fromPlace, toPlace, customerName, email, phone } = req.body;
-    
+
     if (!carId || !fromDate || !toDate || !fromTime || !toTime || !fromPlace || !toPlace || !customerName || !email || !phone) {
         return res.status(400).json({ error: 'Missing required fields.' });
     }
@@ -36,8 +37,8 @@ exports.createReservation = async (req, res) => {
 
         // Validate that fromDateTime is before toDateTime
         if (fromDateTime >= toDateTime) {
-            return res.status(400).json({ 
-                error: 'Start date must be before end date' 
+            return res.status(400).json({
+                error: 'Start date must be before end date'
             });
         }
 
@@ -46,17 +47,17 @@ exports.createReservation = async (req, res) => {
             carId,
             paymentStatus: 'completed',
             $or: [
-                // Случай 1: Нова резервация започва по време на съществуваща
+                // Case 1: New reservation starts during an existing one
                 {
                     fromDateTime: { $lte: fromDateTime.toISOString() },
                     toDateTime: { $gte: fromDateTime.toISOString() }
                 },
-                // Случай 2: Нова резервация завършва по време на съществуваща
+                // Case 2: New reservation ends during an existing one
                 {
                     fromDateTime: { $lte: toDateTime.toISOString() },
                     toDateTime: { $gte: toDateTime.toISOString() }
                 },
-                // Случай 3: Нова резервация обхваща съществуваща
+                // Case 3: New reservation encompasses an existing one
                 {
                     fromDateTime: { $gte: fromDateTime.toISOString() },
                     toDateTime: { $lte: toDateTime.toISOString() }
@@ -66,12 +67,15 @@ exports.createReservation = async (req, res) => {
 
         if (existingReservations.length > 0) {
             return res.status(409).json({
-                error: 'Колата вече е резервирана за този период'
+                error: 'Car is already reserved for this period'
             });
         }
 
-        // Create reservation directly for testing
-        const reservationData = {
+        // Create payment intent with Stripe
+        const paymentIntent = await createPaymentIntent(carId, fromDate, toDate);
+
+        // Store reservation data in temporary collection
+        const pendingReservation = new PendingReservation({
             carId,
             fromDate,
             toDate,
@@ -84,35 +88,148 @@ exports.createReservation = async (req, res) => {
             phone,
             fromDateTime: fromDateTime.toISOString(),
             toDateTime: toDateTime.toISOString(),
-            totalAmount: 100, // Dummy amount for testing
-            paymentStatus: 'completed' // Set as completed for testing
-        };
+            totalAmount: paymentIntent.totalAmount,
+            paymentIntentId: paymentIntent.clientSecret.split('_secret_')[0],
+            expiresAt: new Date(Date.now() + 30 * 60 * 1000) // Expires in 30 minutes
+        });
 
-        // Create the reservation
-        const reservation = await addReservation(reservationData);
-        
-        res.status(201).json({
+        await pendingReservation.save();
+
+        res.status(200).json({
             success: true,
-            message: 'Reservation created successfully',
-            reservation
+            message: 'Payment intent created successfully',
+            clientSecret: paymentIntent.clientSecret
         });
     } catch (err) {
-        console.error('Reservation creation error:', err);
+        console.error('Payment intent creation error:', err);
         res.status(500).json({ error: err.message });
     }
 };
 
-// Comment out or simplify confirmPayment endpoint since we're not using payments
 exports.confirmPayment = async (req, res) => {
-    res.status(200).json({ success: true, message: 'Payment confirmation skipped for testing' });
+    try {
+        const { paymentIntentId } = req.body;
+
+        if (!paymentIntentId) {
+            return res.status(400).json({ error: 'Payment intent ID is required' });
+        }
+
+        console.log('Confirming payment for intent:', paymentIntentId);
+
+        // Verify payment status with Stripe
+        const isPaymentSuccessful = await confirmPayment(paymentIntentId);
+
+        if (!isPaymentSuccessful) {
+            console.log('Payment verification failed for intent:', paymentIntentId);
+            return res.status(400).json({ error: 'Payment verification failed' });
+        }
+
+        console.log('Payment successful, creating reservation...');
+
+        // Find pending reservation
+        const pendingReservation = await PendingReservation.findOne({ paymentIntentId });
+
+        if (!pendingReservation) {
+            console.log('Pending reservation not found for payment intent:', paymentIntentId);
+            return res.status(404).json({ error: 'Reservation data not found' });
+        }
+
+        // Generate unique reservation code
+        const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+        // Create the reservation
+        const reservation = new Reservation({
+            ...pendingReservation.toObject(),
+            code,
+            paymentStatus: 'completed'
+        });
+
+        // Remove unnecessary fields
+        delete reservation._id;
+        delete reservation.expiresAt;
+
+        // Save the reservation
+        const savedReservation = await reservation.save();
+        const populatedReservation = await savedReservation.populate(['carId', 'fromPlace', 'toPlace']);
+
+        // Delete the pending reservation
+        await PendingReservation.deleteOne({ _id: pendingReservation._id });
+
+        console.log('Reservation created successfully:', populatedReservation._id);
+
+        // Send confirmation emails with retries
+        let emailsSent = false;
+        let retryCount = 0;
+        const maxRetries = 3;
+
+        while (!emailsSent && retryCount < maxRetries) {
+            try {
+                // Send payment confirmation first
+                await sendPaymentConfirmation(populatedReservation);
+                console.log('Payment confirmation email sent');
+
+                // Then send reservation confirmation
+                await sendReservationConfirmation(populatedReservation);
+                console.log('Reservation confirmation email sent');
+                
+                emailsSent = true;
+            } catch (emailError) {
+                retryCount++;
+                console.error(`Error sending confirmation emails (attempt ${retryCount}):`, emailError);
+                
+                if (retryCount < maxRetries) {
+                    console.log(`Retrying email send in 1 second...`);
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+        }
+
+        if (!emailsSent) {
+            console.error('Failed to send confirmation emails after all retries');
+        }
+
+        // Return success response with reservation details
+        res.json({
+            success: true,
+            message: 'Payment confirmed and reservation created successfully',
+            emailsSent,
+            reservation: {
+                id: populatedReservation._id,
+                code: populatedReservation.code,
+                customerName: populatedReservation.customerName,
+                email: populatedReservation.email,
+                phone: populatedReservation.phone,
+                fromDate: populatedReservation.fromDate,
+                toDate: populatedReservation.toDate,
+                fromTime: populatedReservation.fromTime,
+                toTime: populatedReservation.toTime,
+                totalAmount: populatedReservation.totalAmount,
+                car: {
+                    make: populatedReservation.carId.make,
+                    model: populatedReservation.carId.model
+                },
+                fromPlace: populatedReservation.fromPlace ? {
+                    name: populatedReservation.fromPlace.name,
+                    address: populatedReservation.fromPlace.address
+                } : null,
+                toPlace: populatedReservation.toPlace ? {
+                    name: populatedReservation.toPlace.name,
+                    address: populatedReservation.toPlace.address
+                } : null
+            }
+        });
+    } catch (err) {
+        console.error('Payment confirmation error:', err);
+        res.status(500).json({ error: err.message });
+    }
 };
 
 exports.searchAvailableCars = async (req, res) => {
     try {
-        const { 
+        const {
             pickupTime, returnTime,
-            fromDate, toDate, fromTime, toTime, 
-            pickupLocation, returnLocation 
+            fromDate, toDate, fromTime, toTime,
+            carId
         } = req.query;
 
         let fromDateTime, toDateTime;
@@ -125,54 +242,49 @@ exports.searchAvailableCars = async (req, res) => {
             toDateTime = new Date(`${toDate}T${toTime}`);
         } else {
             return res.status(400).json({
-                error: 'Моля, въведете валидни дата и час (или във формат ISO string, или като отделни дата и час)'
-            });
-        }
-
-        if (!pickupLocation) {
-            return res.status(400).json({
-                error: 'Моля, въведете локация за взимане'
+                error: 'Please provide valid date and time (either as ISO string or as separate date and time)'
             });
         }
 
         if (isNaN(fromDateTime.getTime()) || isNaN(toDateTime.getTime())) {
             return res.status(400).json({
-                error: 'Невалиден формат на дата или час'
+                error: 'Invalid date or time format'
             });
         }
 
         if (fromDateTime >= toDateTime) {
             return res.status(400).json({
-                error: 'Началната дата и час трябва да са преди крайната дата и час'
+                error: 'Start date and time must be before end date and time'
             });
         }
 
-        // Get all cars with their details
-        const allCars = await Car.find()
-            .populate('currentLocation')
-            .populate({
-                path: 'currentLocation',
-                select: 'name address'
-            });
+        // Get all cars or specific car if carId is provided
+        const carsQuery = carId ? Car.findById(carId) : Car.find();
+        const allCars = await carsQuery.populate('currentLocation');
 
-        // Get all reservations that might conflict
+        // Get all reservations that might conflict, including 2-hour gap requirement
+        const MINIMUM_TIME_BETWEEN_RESERVATIONS = 120; // 2 hours in minutes
         const conflictingReservations = await Reservation.find({
             paymentStatus: 'completed',
             $or: [
-                // Случай 1: Търсеният период започва по време на резервация
+                // Direct time overlap
                 {
-                    fromDateTime: { $lte: fromDateTime.toISOString() },
-                    toDateTime: { $gte: fromDateTime.toISOString() }
+                    fromDateTime: { $lt: toDateTime },
+                    toDateTime: { $gt: fromDateTime }
                 },
-                // Случай 2: Търсеният период завършва по време на резервация
+                // Check for minimum gap before this reservation
                 {
-                    fromDateTime: { $lte: toDateTime.toISOString() },
-                    toDateTime: { $gte: toDateTime.toISOString() }
+                    fromDateTime: {
+                        $gt: fromDateTime,
+                        $lt: new Date(new Date(toDateTime).getTime() + MINIMUM_TIME_BETWEEN_RESERVATIONS * 60 * 1000)
+                    }
                 },
-                // Случай 3: Търсеният период обхваща резервация
+                // Check for minimum gap after this reservation
                 {
-                    fromDateTime: { $gte: fromDateTime.toISOString() },
-                    toDateTime: { $lte: toDateTime.toISOString() }
+                    toDateTime: {
+                        $lt: toDateTime,
+                        $gt: new Date(new Date(fromDateTime).getTime() - MINIMUM_TIME_BETWEEN_RESERVATIONS * 60 * 1000)
+                    }
                 }
             ]
         }).select('carId fromDateTime toDateTime');
@@ -180,57 +292,28 @@ exports.searchAvailableCars = async (req, res) => {
         // Create a set of booked car IDs
         const bookedCarIds = new Set(conflictingReservations.map(res => res.carId.toString()));
 
-        // Filter available cars
-        const availableCars = allCars.filter(car => {
-            // Skip cars that are not at the requested location
-            if (car.currentLocation?._id.toString() !== pickupLocation) {
-                return false;
-            }
+        // Filter available cars - check for time overlap and minimum gap
+        const availableCars = Array.isArray(allCars) ? allCars.filter(car => !bookedCarIds.has(car._id.toString())) : 
+                             !bookedCarIds.has(allCars._id.toString()) ? [allCars] : [];
 
-            // Skip cars that have conflicting reservations
-            if (bookedCarIds.has(car._id.toString())) {
-                return false;
-            }
-
-            return true;
-        });
-
-        // Format response
-        const formattedCars = availableCars.map(car => ({
-            id: car._id,
-            make: car.make,
-            model: car.model,
-            name: car.name,
-            mainImage: car.mainImage,
-            thumbnails: car.thumbnails,
-            engine: car.engine,
-            fuel: car.fuel,
-            transmission: car.transmission,
-            seats: car.seats,
-            doors: car.doors,
-            year: car.year,
-            consumption: car.consumption,
-            bodyType: car.bodyType,
-            priceIncludes: car.priceIncludes,
-            features: car.features,
-            pricing: car.pricing,
-            location: {
-                id: car.currentLocation._id,
-                name: car.currentLocation.name,
-                address: car.currentLocation.address
-            }
-        }));
-
+        // Format response – include image and full pricing so the frontend can render correctly
         res.json({
-            count: formattedCars.length,
-            cars: formattedCars
+            count: availableCars.length,
+            cars: availableCars.map(car => ({
+                _id: car._id,
+                name: car.name,
+                make: car.make,
+                model: car.model,
+                currentLocation: car.currentLocation,
+                mainImage: car.mainImage,
+                pricing: car.pricing,
+                price: car.pricing?.["1_3"] || 0 // direct convenience field
+            }))
         });
 
-    } catch (error) {
-        console.error('Error searching for available cars:', error);
-        res.status(500).json({
-            error: 'Възникна грешка при търсенето на налични автомобили'
-        });
+    } catch (err) {
+        console.error('Error searching for available cars:', err);
+        res.status(500).json({ error: err.message });
     }
 };
 
@@ -274,7 +357,7 @@ exports.getCarAvailability = async (req, res) => {
             for (const reservation of reservations) {
                 const resStart = new Date(reservation.fromDateTime);
                 const resEnd = new Date(reservation.toDateTime);
-                
+
                 // Check if this reservation affects current date
                 const resStartDate = new Date(resStart);
                 const resEndDate = new Date(resEnd);
@@ -284,10 +367,10 @@ exports.getCarAvailability = async (req, res) => {
 
                 if (currentDateCopy >= resStartDate && currentDateCopy <= resEndDate) {
                     // This reservation affects this date
-                    const startHour = currentDateCopy.getTime() === resStartDate.getTime() 
+                    const startHour = currentDateCopy.getTime() === resStartDate.getTime()
                         ? resStart.getHours()
                         : 9;
-                    
+
                     const endHour = currentDateCopy.getTime() === resEndDate.getTime()
                         ? resEnd.getHours()
                         : 18;
