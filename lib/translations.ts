@@ -432,11 +432,13 @@ export const translations = {
     hideAllMobile: "Скрий всички",
 
     // Success page
-    bookingSuccess: "Успешна резервация!",
-    checkEmailForCode: "Моля, проверете вашия имейл за код на резервацията.",
-    saveBookingCode: "Запазете кода на резервацията си",
-    contactForQuestions: "Свържете се с нас при въпроси",
-    yourBookingCode: "Вашият код е:",
+    bookingConfirmationSent: "Потвърждение за резервацията беше изпратено на вашия имейл.",
+    thankYouForBooking: "Благодарим ви, че избрахте нашите услуги!",
+    redirectingHome: "Ще бъдете пренасочени към началната страница след {seconds} секунди",
+    checkEmailStep: "Проверете вашия имейл за потвърждение на резервацията",
+    saveBookingCode: "Запазете вашия код за резервация за бъдеща справка",
+    contactForQuestions: "Свържете се с нас при въпроси или нужда от съдействие",
+    paymentConfirmationFailed: "Възникна проблем при потвърждаване на плащането",
 
     luxuryAndComfort: "Луксозният и комфортен",
     perfectForBusiness: "е перфектен избор за бизнес пътувания и специални поводи.",
@@ -876,11 +878,13 @@ export const translations = {
     hideAllMobile: "Hide All",
 
     // Success page
-    bookingSuccess: "Booking Successful!",
-    checkEmailForCode: "Please check your email for the booking code.",
-    saveBookingCode: "Save your booking code",
-    contactForQuestions: "Contact us if you have any questions",
-    yourBookingCode: "Your booking code is:",
+    bookingConfirmationSent: "A booking confirmation has been sent to your email.",
+    thankYouForBooking: "Thank you for choosing our services!",
+    redirectingHome: "You will be redirected to the homepage in {seconds} seconds",
+    checkEmailStep: "Check your email for booking confirmation",
+    saveBookingCode: "Save your booking code for future reference",
+    contactForQuestions: "Contact us if you have any questions or need assistance",
+    paymentConfirmationFailed: "There was a problem confirming your payment",
 
     luxuryAndComfort: "The luxurious and comfortable",
     perfectForBusiness: "is perfect for business trips and special occasions.",
