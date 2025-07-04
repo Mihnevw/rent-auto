@@ -10,84 +10,40 @@ const routes = require('./routes');
 const app = express();
 const PORT = process.env.PORT || 8800;
 
-// Validate MongoDB URI
-if (!process.env.MONGODB_URI) {
-    throw new Error('MONGODB_URI environment variable is required');
-}
-
-// MongoDB connection options
-const mongooseOptions = {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/rent-a-car', {
     useNewUrlParser: true,
-    useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
-    socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
-    family: 4 // Use IPv4, skip trying IPv6
-};
-
-// Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, mongooseOptions)
-    .then(() => {
-        console.log('Successfully connected to MongoDB Atlas');
-    })
-    .catch((err) => {
-        console.error('MongoDB connection error:', err);
-        process.exit(1); // Exit if we can't connect to the database
-    });
-
-// Handle MongoDB connection events
-mongoose.connection.on('error', err => {
+    useUnifiedTopology: true
+}).then(() => {
+    console.log('Connected to MongoDB');
+}).catch((err) => {
     console.error('MongoDB connection error:', err);
 });
 
-mongoose.connection.on('disconnected', () => {
-    console.log('MongoDB disconnected. Attempting to reconnect...');
-});
-
-mongoose.connection.on('reconnected', () => {
-    console.log('MongoDB reconnected');
-});
-
-// CORS configuration
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
-    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-    : ['http://localhost:3000']; // Default to Next.js development server
-
-console.log('Allowed origins:', allowedOrigins); // Debug log
+  ? process.env.ALLOWED_ORIGINS.split(',') 
+  : ['http://localhost:3000']; // Default to Next.js development server
 
 app.use(cors({
     origin: function(origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) {
-            console.log('Request with no origin');
-            return callback(null, true);
-        }
-        
-        console.log('Request from origin:', origin); // Debug log
+        if (!origin) return callback(null, true);
         
         if (allowedOrigins.indexOf(origin) === -1) {
-            console.log('Origin not allowed:', origin);
             return callback(new Error('CORS policy violation'), false);
         }
-        
-        console.log('Origin allowed:', origin);
         return callback(null, true);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-    maxAge: 86400 // CORS preflight cache for 24 hours
+    credentials: true
 }));
 
-// Session configuration
 if (!process.env.SESSION_SECRET) {
     throw new Error('SESSION_SECRET environment variable is required');
 }
 
 app.use(session({
-    store: MongoStore.create({ 
-        mongoUrl: process.env.MONGODB_URI,
-        mongoOptions: mongooseOptions
-    }),
+    store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
@@ -97,12 +53,10 @@ app.use(session({
     }
 }));
 
-// Middleware
 app.use('/uploads', express.static('uploads'));
 app.use(bodyParser.json());
 app.use(routes);
 
-// Start server
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on http://localhost:${PORT}`);
 });
