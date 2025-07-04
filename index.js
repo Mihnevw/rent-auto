@@ -49,22 +49,33 @@ mongoose.connection.on('reconnected', () => {
 
 // CORS configuration
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
-    ? process.env.ALLOWED_ORIGINS.split(',') 
+    ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
     : ['http://localhost:3000']; // Default to Next.js development server
+
+console.log('Allowed origins:', allowedOrigins); // Debug log
 
 app.use(cors({
     origin: function(origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
+        if (!origin) {
+            console.log('Request with no origin');
+            return callback(null, true);
+        }
+        
+        console.log('Request from origin:', origin); // Debug log
         
         if (allowedOrigins.indexOf(origin) === -1) {
+            console.log('Origin not allowed:', origin);
             return callback(new Error('CORS policy violation'), false);
         }
+        
+        console.log('Origin allowed:', origin);
         return callback(null, true);
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+    credentials: true,
+    maxAge: 86400 // CORS preflight cache for 24 hours
 }));
 
 // Session configuration
