@@ -1,19 +1,38 @@
 # Dependencies
-node_modules/
-package-lock.json
+/node_modules
+/.pnp
+.pnp.js
 
 # Environment variables
+.env
 .env.local
-.env.development
-.env.test
-.env.production
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+/build
+/dist
+/.next
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
 
 # Logs
 logs
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Runtime data
 pids
@@ -25,23 +44,12 @@ pids
 uploads/*
 !uploads/.gitkeep
 
-# IDE and editor files
-.idea/
-.vscode/
-*.swp
-*.swo
-.DS_Store
-Thumbs.db
-
 # Coverage directory used by tools like istanbul
 coverage/
 
 # Temporary files
 tmp/
 temp/
-
-# Debug log from npm
-npm-debug.log
 
 # Optional npm cache directory
 .npm
@@ -59,11 +67,10 @@ npm-debug.log
 .yarn-integrity
 
 # dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
 .env.local
+.env.development
+.env.test
+.env.production
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache

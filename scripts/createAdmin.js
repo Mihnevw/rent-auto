@@ -1,5 +1,10 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('../models/userModel');
+
+if (!process.env.ADMIN_PASSWORD) {
+    throw new Error('ADMIN_PASSWORD environment variable is required');
+}
 
 async function createFirstAdmin() {
     try {
@@ -10,10 +15,11 @@ async function createFirstAdmin() {
 
         const adminData = {
             email: 'admin@rentacar.com',
-            password: 'admin123',
+            password: process.env.ADMIN_PASSWORD,
             firstName: 'Admin',
             lastName: 'User',
-            phone: '+1234567890'
+            role: 'admin',
+            phone: '+359123456789'
         };
 
         const admin = new User(adminData);

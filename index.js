@@ -38,19 +38,18 @@ app.use(cors({
     credentials: true
 }));
 
-// Session configuration
+if (!process.env.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET environment variable is required');
+}
+
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/rent-a-car',
-        ttl: 24 * 60 * 60 // Session TTL (1 day)
-    }),
     cookie: {
         secure: process.env.NODE_ENV === 'production',
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 1 day
+        maxAge: 1000 * 60 * 60 * 24 // 24 hours
     }
 }));
 
