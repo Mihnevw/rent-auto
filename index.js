@@ -19,22 +19,10 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/rent-a-ca
     console.error('MongoDB connection error:', err);
 });
 
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',') 
-  : ['http://localhost:3000']; // Default to Next.js development server
-
 app.use(cors({
-    origin: function(origin, callback) {
-        // Allow requests with no origin (like mobile apps or curl requests)
-        if (!origin) return callback(null, true);
-        
-        if (allowedOrigins.indexOf(origin) === -1) {
-            return callback(new Error('CORS policy violation'), false);
-        }
-        return callback(null, true);
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: process.env.ALLOWED_ORIGINS 
+        ? process.env.ALLOWED_ORIGINS.split(',') 
+        : ['http://localhost:3000', 'http://127.0.0.1:3000'],
     credentials: true
 }));
 
@@ -54,6 +42,7 @@ app.use(session({
 }));
 
 app.use('/uploads', express.static('uploads'));
+app.use('/images', express.static('images'));
 app.use(bodyParser.json());
 app.use(routes);
 

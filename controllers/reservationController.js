@@ -226,104 +226,35 @@ exports.confirmPayment = async (req, res) => {
 
 exports.searchAvailableCars = async (req, res) => {
     try {
-        const {
-            pickupTime, returnTime,
-            fromDate, toDate, fromTime, toTime,
-            carId
-        } = req.query;
+        const { pickupTime, returnTime, pickupLocation, returnLocation } = req.query;
 
-        let fromDateTime, toDateTime;
-
-        if (pickupTime && returnTime) {
-            fromDateTime = new Date(pickupTime);
-            toDateTime = new Date(returnTime);
-        } else if (fromDate && toDate && fromTime && toTime) {
-            fromDateTime = new Date(`${fromDate}T${fromTime}`);
-            toDateTime = new Date(`${toDate}T${toTime}`);
-        } else {
-            return res.status(400).json({
-                error: 'Please provide valid date and time (either as ISO string or as separate date and time)'
-            });
+        if (!pickupTime || !returnTime || !pickupLocation || !returnLocation) {
+            return res.status(400).json({ error: 'Missing required parameters' });
         }
 
-        if (isNaN(fromDateTime.getTime()) || isNaN(toDateTime.getTime())) {
-            return res.status(400).json({
-                error: 'Invalid date or time format'
-            });
+        // Get all cars
+        const allCars = await Car.find();
+        const availableCars = [];
+
+        // Check each car's availability
+        for (const car of allCars) {
+            const isAvailable = await isCarAvailable(
+                car._id,
+                new Date(pickupTime),
+                new Date(returnTime)
+            );
+
+            if (isAvailable) {
+                availableCars.push(car);
+            }
         }
 
-        if (fromDateTime >= toDateTime) {
-            return res.status(400).json({
-                error: 'Start date and time must be before end date and time'
-            });
-        }
-
-        // Get all cars or specific car if carId is provided
-        const carsQuery = carId ? Car.findById(carId) : Car.find();
-        const allCars = await carsQuery.populate('currentLocation');
-
-        // Get all reservations that might conflict, including 2-hour gap requirement
-        const MINIMUM_TIME_BETWEEN_RESERVATIONS = 120; // 2 hours in minutes
-        const conflictingReservations = await Reservation.find({
-            paymentStatus: 'completed',
-            $or: [
-                // Direct time overlap
-                {
-                    fromDateTime: { $lt: toDateTime },
-                    toDateTime: { $gt: fromDateTime }
-                },
-                // Check for minimum gap before this reservation
-                {
-                    fromDateTime: {
-                        $gt: fromDateTime,
-                        $lt: new Date(new Date(toDateTime).getTime() + MINIMUM_TIME_BETWEEN_RESERVATIONS * 60 * 1000)
-                    }
-                },
-                // Check for minimum gap after this reservation
-                {
-                    toDateTime: {
-                        $lt: toDateTime,
-                        $gt: new Date(new Date(fromDateTime).getTime() - MINIMUM_TIME_BETWEEN_RESERVATIONS * 60 * 1000)
-                    }
-                }
-            ]
-        }).select('carId fromDateTime toDateTime');
-
-        // Create a set of booked car IDs
-        const bookedCarIds = new Set(conflictingReservations.map(res => res.carId.toString()));
-
-        // Filter available cars - check for time overlap and minimum gap
-        const availableCars = Array.isArray(allCars) ? allCars.filter(car => !bookedCarIds.has(car._id.toString())) : 
-                             !bookedCarIds.has(allCars._id.toString()) ? [allCars] : [];
-
-        // Format response – include image and full pricing so the frontend can render correctly
         res.json({
             count: availableCars.length,
-            cars: availableCars.map(car => ({
-                _id: car._id,
-                name: car.name,
-                make: car.make,
-                model: car.model,
-                currentLocation: car.currentLocation,
-                mainImage: car.mainImage,
-                thumbnails: car.thumbnails,
-                engine: car.engine,
-                fuel: car.fuel,
-                transmission: car.transmission,
-                seats: car.seats,
-                doors: car.doors,
-                year: car.year,
-                consumption: car.consumption,
-                bodyType: car.bodyType,
-                priceIncludes: car.priceIncludes,
-                features: car.features,
-                pricing: car.pricing,
-                price: car.pricing?.["1_3"] || 0 // direct convenience field
-            }))
+            availableCars
         });
-
     } catch (err) {
-        console.error('Error searching for available cars:', err);
+        console.error('Error searching available cars:', err);
         res.status(500).json({ error: err.message });
     }
 };

@@ -24,23 +24,28 @@ exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
         const result = await authService.login(email, password);
+        
+        // Store user in session for admin panel
+        req.session.userId = result.user._id;
+        req.session.user = result.user;
+        
         res.json(result);
     } catch (err) {
         res.status(401).json({ error: err.message });
     }
 };
 
-// Verify token and return user data
+// Verify session and return user data
 exports.verify = async (req, res) => {
     try {
-        // The authenticate middleware adds decoded token to req.user
-        if (!req.user || !req.user.userId) {
-            return res.status(401).json({ error: 'Invalid token' });
+        // Check if user is logged in via session
+        if (!req.session.userId) {
+            return res.status(401).json({ error: 'Not authenticated' });
         }
 
         // Fetch user details (exclude password)
         const User = require('../models/userModel');
-        const user = await User.findById(req.user.userId).select('-password');
+        const user = await User.findById(req.session.userId).select('-password');
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -71,4 +76,14 @@ exports.getDashboardStats = async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
+};
+
+exports.logout = (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ error: 'Failed to logout' });
+        }
+        res.clearCookie('connect.sid');
+        res.json({ success: true, message: 'Logged out successfully' });
+    });
 }; 

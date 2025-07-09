@@ -47,21 +47,27 @@ exports.submitContactForm = async (req, res) => {
 
         // Изпращане на потвърждение до клиента
         await transporter.sendMail({
-            from: `"Rent a Car" <${process.env.SMTP_USER}>`,
+            from: `"AUTO RENT" <${process.env.SMTP_USER}>`,
             to: email,
             subject: 'Благодарим за вашето съобщение',
             html: `
-                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                    <h2 style="color: #333;">Получихме вашето съобщение</h2>
-                    <div style="background-color: #f5f5f5; padding: 20px; border-radius: 5px;">
-                        <p>Здравейте ${fullName},</p>
-                        <p>Благодарим ви, че се свързахте с нас. Това е автоматично потвърждение, че получихме вашето съобщение.</p>
-                        <p>Ще се свържем с вас възможно най-скоро.</p>
-                        <br>
-                        <p><strong>Вашето съобщение:</strong></p>
-                        <p style="white-space: pre-wrap;">${message}</p>
-                        <br>
-                        <p>С уважение,<br>Екипът на Rent a Car</p>
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); padding: 32px 24px;">
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <div style="display: inline-block; background: #22c55e; border-radius: 50%; width: 56px; height: 56px; line-height: 56px;">
+                            <span style="font-size: 32px; color: #fff; vertical-align: middle;">&#10003;</span>
+                        </div>
+                        <h2 style="color: #1e293b; font-size: 2rem; margin: 16px 0 0 0; font-weight: bold;">Благодарим ви за вашето съобщение!</h2>
+                    </div>
+                    <div style="background-color: #fff; padding: 24px; border-radius: 8px; margin-bottom: 24px; border: 1px solid #e5e7eb;">
+                        <p style="font-size: 1.1rem; color: #222; margin-bottom: 12px;">Здравейте, <strong>${fullName}</strong>,</p>
+                        <p style="color: #334155; margin-bottom: 12px;">Благодарим ви, че се свързахте с нас. Това е автоматично потвърждение, че получихме вашето съобщение.</p>
+                        <p style="color: #334155; margin-bottom: 12px;">Ще се свържем с вас възможно най-скоро.</p>
+                        <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e7eb;" />
+                        <p style="color: #1e293b; font-weight: 500; margin-bottom: 6px;">Вашето съобщение:</p>
+                        <div style="background: #f1f5f9; border-radius: 6px; padding: 16px; color: #475569; font-size: 1rem; white-space: pre-wrap;">${message}</div>
+                    </div>
+                    <div style="text-align: right; color: #64748b; font-size: 1rem; margin-top: 16px;">
+                        <p>С уважение,<br><span style="font-weight: 500; color: #0ea5e9;">Екипът на AUTORENT</span></p>
                     </div>
                 </div>
             `
