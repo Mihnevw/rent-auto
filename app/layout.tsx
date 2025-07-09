@@ -2,9 +2,8 @@ import { Inter } from "next/font/google"
 import { Metadata } from "next"
 import { LanguageProvider } from "@/lib/language-context"
 import { cn } from "@/lib/utils"
-import { ConditionalHeader } from "@/components/conditional-header"
+import { Header } from "@/components/header"
 import { Toaster } from "@/components/ui/sonner"
-import { MainContainer } from "@/components/main-container"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin", "cyrillic"] })
@@ -59,10 +58,10 @@ export default function RootLayout({
       </head>
       <body className={cn("min-h-screen bg-background font-sans antialiased", inter.className)}>
         <LanguageProvider>
-          <ConditionalHeader />
-          <MainContainer>
+          <Header />
+          <main className="pt-[72px] sm:pt-[80px]">
             {children}
-          </MainContainer>
+          </main>
           <Toaster />
         </LanguageProvider>
       </body>

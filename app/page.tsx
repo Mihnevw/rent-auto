@@ -19,8 +19,8 @@ export default function DLRentHomepage() {
     "@type": "Organization",
     "name": "AUTO Rent",
     "description": t("siteDescription"),
-    "url": "https://autorent.eu",
-    "logo": "https://autorent.eu/images/placeholder-logo.png",
+    "url": "https://autorent-bg.com",
+    "logo": "https://autorent-bg.com/images/placeholder-logo.png",
     "address": {
       "@type": "PostalAddress",
       "addressCountry": "Bulgaria"
@@ -42,12 +42,12 @@ export default function DLRentHomepage() {
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/images/dlrent-office.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <link rel="canonical" href="https://autorent.eu" />
+        <link rel="canonical" href="https://autorent-bg.com" />
 
         {/* Hreflang tags for language/region targeting */}
-        <link rel="alternate" hrefLang="en" href="https://autorent.eu/en" />
-        <link rel="alternate" hrefLang="bg" href="https://autorent.eu/bg" />
-        <link rel="alternate" hrefLang="x-default" href="https://autorent.eu" />
+        <link rel="alternate" hrefLang="en" href="https://autorent-bg.com/en" />
+        <link rel="alternate" hrefLang="bg" href="https://autorent-bg.com/bg" />
+        <link rel="alternate" hrefLang="x-default" href="https://autorent-bg.com" />
 
         <script type="application/ld+json">
           {JSON.stringify(structuredData)}

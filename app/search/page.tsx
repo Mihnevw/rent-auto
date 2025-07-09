@@ -45,8 +45,8 @@ interface Car {
 }
 
 interface SearchResponse {
+  availableCars: Car[]
   count: number
-  cars: Car[]
 }
 
 export default function SearchPage() {
@@ -88,14 +88,14 @@ export default function SearchPage() {
         const pickupDateTime = new Date(`${pickupDate}T${pickupTime}`).toISOString()
         const returnDateTime = new Date(`${returnDate}T${returnTime}`).toISOString()
 
-        const params = {
+        const params = new URLSearchParams({
           pickupTime: pickupDateTime,
           returnTime: returnDateTime,
           pickupLocation: pickup,
           returnLocation: returnLoc
-        }
+        })
 
-        const response = await fetch(buildApiUrl(config.api.endpoints.availableCars, params))
+        const response = await fetch(`http://localhost:8800/reservations/cars/available?${params.toString()}`)
         if (!response.ok) {
           const errorData = await response.json()
           throw new Error(errorData.error || t("failedToFetchCars"))
@@ -105,12 +105,12 @@ export default function SearchPage() {
         console.log("API Response:", data)
 
         // Ensure cars data is valid
-        if (!data || !Array.isArray(data.cars)) {
+        if (!data || !Array.isArray(data.availableCars)) {
           throw new Error("Invalid API response format")
         }
 
         // Map and validate the response
-        const validCars = data.cars
+        const validCars = data.availableCars
           .map(car => {
             const carId = car._id || car.id
             if (typeof carId !== 'string') return null

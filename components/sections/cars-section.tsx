@@ -132,8 +132,10 @@ export function CarsSection() {
                 <h3 className="text-base sm:text-lg font-bold text-blue-600 mb-3 sm:mb-4 line-clamp-1">{car.name}</h3>
                 <div className="w-full aspect-[4/3] relative mb-4">
                   <Image
-                    src={car.mainImage.startsWith('http') ? car.mainImage : `http://localhost:8800${car.mainImage}`}
-                    alt={car.name}
+                    src={car.mainImage ? 
+                      (car.mainImage.startsWith('http') ? car.mainImage : `http://localhost:8800${car.mainImage}`)
+                      : '/placeholder.jpg'}
+                    alt={car.name || 'Car image'}
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     className="object-contain bg-white rounded-lg"
@@ -151,22 +153,24 @@ export function CarsSection() {
                   </div>
                   <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                     <DoorOpen className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                    <span className="truncate">{car.doors} {t("doors")}</span>
+                    <span className="truncate">{car.doors || 'N/A'} {t("doors")}</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                     <Car className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                    <span className="truncate">{t(car.bodyType.toLowerCase() as any)}</span>
+                    <span className="truncate">{car.bodyType ? t(car.bodyType.toLowerCase() as any) : 'N/A'}</span>
                   </div>
                   <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                     <Fuel className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                    <span className="truncate">{t(car.fuel.toLowerCase() as any)}</span>
+                    <span className="truncate">{car.fuel ? t(car.fuel.toLowerCase() as any) : 'N/A'}</span>
                   </div>
                 </div>
               </div>
 
               <div className="mt-auto">
                 <div className="text-center mb-4">
-                  <div className="text-2xl sm:text-3xl font-bold text-blue-600">{formatPrice(car.pricing["1_3"])}</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600">
+                    {car.pricing && car.pricing["1_3"] ? formatPrice(car.pricing["1_3"]) : 'N/A'}
+                  </div>
                   <div className="text-xs sm:text-sm text-gray-500">{t("perDay")}</div>
                 </div>
 

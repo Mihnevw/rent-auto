@@ -12,11 +12,7 @@ export const config = {
       availableCars: '/reservations/cars/available',
       carAvailability: '/reservations/availability',
       confirmPayment: '/reservations/confirm-payment',
-      login: '/login',
-      verify: '/verify',
-      contact: '/contact',
-      users: '/users',
-      dashboardStats: '/admin/dashboard-stats'
+      contact: '/contact'
     }
   },
   stripe: {

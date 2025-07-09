@@ -10,9 +10,10 @@ import { MapPin, Phone, Mail, Clock } from "lucide-react"
 import { useLanguage } from "@/lib/language-context"
 import Head from "next/head"
 import { FooterSection } from "@/components/sections/footer-section"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useToast } from "@/components/ui/use-toast"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useRouter } from "next/navigation"
 
 // List of allowed email domains
 const ALLOWED_EMAIL_DOMAINS = [
@@ -70,9 +71,11 @@ const SUSPICIOUS_PATTERNS = [
 export default function ContactsPage() {
   const { t, formatPrice } = useLanguage()
   const { toast } = useToast()
+  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [emailError, setEmailError] = useState("")
   const [phoneError, setPhoneError] = useState("")
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
 
   const isValidEmail = (email: string) => {
     if (!email) return false
@@ -187,12 +190,9 @@ export default function ContactsPage() {
         throw new Error(result.message || 'Failed to send message')
       }
 
-      toast({
-        title: "Успешно изпратено",
-        description: "Вашето съобщение беше изпратено успешно. Ще се свържем с вас скоро.",
-        duration: 5000,
-      })
-
+      // Show success message
+      setShowSuccessMessage(true)
+      
       // Reset form and errors
       e.currentTarget.reset()
       setEmailError("")
@@ -208,6 +208,16 @@ export default function ContactsPage() {
       setIsSubmitting(false)
     }
   }
+
+  // Redirect to home page after 5 seconds, когато showSuccessMessage стане true
+  useEffect(() => {
+    if (showSuccessMessage) {
+      const timeout = setTimeout(() => {
+        router.push('/')
+      }, 5000)
+      return () => clearTimeout(timeout)
+    }
+  }, [showSuccessMessage, router])
 
   // Structured data for SEO
   const structuredData = {
@@ -295,13 +305,14 @@ export default function ContactsPage() {
                       <div>
                         <h3 className="font-semibold text-gray-800">{t("email")}</h3>
                         <p className="text-gray-600">
-                          <a href="mailto:info@autorent.bg" className="hover:text-blue-600 transition-colors">
+                          <a href="mailto:ivanrent11@gmail.com" className="hover:text-blue-600 transition-colors">
                             ivanrent11@gmail.com
                           </a>
                         </p>
                       </div>
                     </div>
 
+                    {/* Да се премахне работното време */}
                     <div className="flex items-start gap-4">
                       <Clock className="w-6 h-6 text-blue-600 mt-1" />
                       <div>
@@ -344,67 +355,82 @@ export default function ContactsPage() {
                   <CardTitle className="text-2xl text-blue-600">{t("sendMessage")}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="firstName">{t("name")} *</Label>
-                        <Input id="firstName" name="firstName" placeholder={t("firstName")} required />
+                  {showSuccessMessage ? (
+                    <div className="flex flex-col items-center justify-center py-8">
+                      <div className="mb-6">
+                        <svg className="w-20 h-20 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+                          <circle cx="24" cy="24" r="22" strokeWidth="4" className="text-green-400" fill="none" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M16 25l6 6 10-13" className="text-green-400" />
+                        </svg>
                       </div>
-                      <div>
-                        <Label htmlFor="lastName">{t("last")} *</Label>
-                        <Input id="lastName" name="lastName" placeholder={t("lastName")} required />
+                      <div className="text-center">
+                        <div className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">{t("thankYouMessage")}</div>
+                        <div className="text-lg text-gray-600 mb-4">{t("confirmation")}</div>
                       </div>
                     </div>
+                  ) : (
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="firstName">{t("name")} *</Label>
+                          <Input id="firstName" name="firstName" placeholder={t("firstName")} required />
+                        </div>
+                        <div>
+                          <Label htmlFor="lastName">{t("last")} *</Label>
+                          <Input id="lastName" name="lastName" placeholder={t("lastName")} required />
+                        </div>
+                      </div>
 
-                    <div>
-                      <Label htmlFor="email" className="flex justify-between">
-                        {t("emailContact")} *
-                        {emailError && <span className="text-red-500 text-sm">{emailError}</span>}
-                      </Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder={t("emailContactPlaceholder")}
-                        required
-                        className={emailError ? "border-red-500" : ""}
-                        onChange={() => setEmailError("")}
-                      />
-                    </div>
+                      <div>
+                        <Label htmlFor="email" className="flex justify-between">
+                          {t("emailContact")} *
+                          {emailError && <span className="text-red-500 text-sm">{emailError}</span>}
+                        </Label>
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          placeholder={t("emailContactPlaceholder")}
+                          required
+                          className={emailError ? "border-red-500" : ""}
+                          onChange={() => setEmailError("")}
+                        />
+                      </div>
 
-                    <div>
-                      <Label htmlFor="phone" className="flex justify-between">
-                        {t("phone")}
-                        {phoneError && <span className="text-red-500 text-sm">{phoneError}</span>}
-                      </Label>
-                      <Input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        placeholder={t("phoneContactPlaceholder")}
-                        className={phoneError ? "border-red-500" : ""}
-                        onChange={() => setPhoneError("")}
-                      />
-                    </div>
+                      <div>
+                        <Label htmlFor="phone" className="flex justify-between">
+                          {t("phone")}
+                          {phoneError && <span className="text-red-500 text-sm">{phoneError}</span>}
+                        </Label>
+                        <Input
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          placeholder={t("phoneContactPlaceholder")}
+                          className={phoneError ? "border-red-500" : ""}
+                          onChange={() => setPhoneError("")}
+                        />
+                      </div>
 
-                    <div>
-                      <Label htmlFor="subject">{t("subject")}</Label>
-                      <Input id="subject" name="subject" placeholder={t("subjectPlaceholder")} />
-                    </div>
+                      <div>
+                        <Label htmlFor="subject">{t("subject")}</Label>
+                        <Input id="subject" name="subject" placeholder={t("subjectPlaceholder")} />
+                      </div>
 
-                    <div>
-                      <Label htmlFor="message">{t("message")} *</Label>
-                      <Textarea id="message" name="message" placeholder={t("message")} rows={5} required />
-                    </div>
+                      <div>
+                        <Label htmlFor="message">{t("message")} *</Label>
+                        <Textarea id="message" name="message" placeholder={t("message")} rows={5} required />
+                      </div>
 
-                    <Button
-                      type="submit"
-                      className="w-full bg-orange-400 hover:bg-orange-500 text-white font-semibold"
-                      disabled={isSubmitting || !!emailError || !!phoneError}
-                    >
-                      {isSubmitting ? "Изпращане..." : t("sendMessageBtn")}
-                    </Button>
-                  </form>
+                      <Button
+                        type="submit"
+                        className="w-full bg-orange-400 hover:bg-orange-500 text-white font-semibold"
+                        disabled={isSubmitting || !!emailError || !!phoneError}
+                      >
+                        {isSubmitting ? "Изпращане..." : t("sendMessageBtn")}
+                      </Button>
+                    </form>
+                  )}
                 </CardContent>
               </Card>
             </section>

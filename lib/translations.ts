@@ -167,9 +167,9 @@ export const translations = {
     carsPageDescription:
       "Автомобили от висок клас, предлагащи съчетание от комфорт, дизайн и мощност. Разгледайте моделите, които са налични. AUTO RENT Ви пожелава приятно и безаварийно пътуване.",
     filter: "ФИЛТЪР",
-    clearAllFilters: "Изчисти всички",
     bodyType: "Купе",
     selectOption: "Изберете",
+    clearAllFilters: "Изчисти всички",
     showingCars: "Показани са",
     ofCars: "от",
     carsForPeriod: "автомобила за периода",
@@ -440,6 +440,10 @@ export const translations = {
     contactForQuestions: "Свържете се с нас при въпроси или нужда от съдействие",
     paymentConfirmationFailed: "Възникна проблем при потвърждаване на плащането",
 
+    // Contact form success
+    thankYouMessage: "Благодарим ви! Вашето съобщение беше изпратено успешно.",
+    confirmation: "Потвърждение",
+
     luxuryAndComfort: "Луксозният и комфортен",
     perfectForBusiness: "е перфектен избор за бизнес пътувания и специални поводи.",
 
@@ -612,9 +616,6 @@ export const translations = {
 
     // Cars page
     carsPageDescription: "High-class cars offering a combination of comfort, design and power. Browse the available models. AUTO RENT wishes you a pleasant and accident-free journey.",
-    filter: "FILTER",
-    clearAllFilters: "Clear all",
-    bodyType: "Body Type",
     selectOption: "Select",
     showingCars: "Showing",
     ofCars: "of",
@@ -885,6 +886,10 @@ export const translations = {
     saveBookingCode: "Save your booking code for future reference",
     contactForQuestions: "Contact us if you have any questions or need assistance",
     paymentConfirmationFailed: "There was a problem confirming your payment",
+
+    // Contact form success
+    thankYouMessage: "Thank you! Your message has been sent successfully.",
+    confirmation: "Confirmation",
 
     luxuryAndComfort: "The luxurious and comfortable",
     perfectForBusiness: "is perfect for business trips and special occasions.",

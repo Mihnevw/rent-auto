@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Header } from "@/components/header"
 import { FooterSection } from "@/components/sections/footer-section"
@@ -8,7 +8,8 @@ import { useLanguage } from "@/lib/language-context"
 import { CheckCircle, XCircle } from "lucide-react"
 import { buildApiUrl, config, API_BASE_URL } from '@/lib/config'
 
-export default function SuccessPage() {
+// Separate component that uses useSearchParams
+function SuccessPageContent() {
   const { t } = useLanguage()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -255,5 +256,35 @@ export default function SuccessPage() {
       </main>
       <FooterSection />
     </div>
+  )
+}
+
+// Loading fallback component
+function SuccessPageLoading() {
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <main className="max-w-4xl mx-auto px-4 py-16 mt-20">
+        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <h1 className="text-2xl font-bold text-gray-900 mt-4">
+            Loading...
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Preparing your booking confirmation...
+          </p>
+        </div>
+      </main>
+      <FooterSection />
+    </div>
+  )
+}
+
+// Main page component with Suspense boundary
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<SuccessPageLoading />}>
+      <SuccessPageContent />
+    </Suspense>
   )
 } 

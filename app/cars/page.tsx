@@ -308,7 +308,7 @@ export default function CarsPage() {
       
       const data = await response.json()
       // Transform the cars data to ensure _id is present
-      const transformedCars = data.cars.map((car: { id?: string; _id?: string } & Omit<CarType, '_id'>) => ({
+      const transformedCars = data.availableCars.map((car: { id?: string; _id?: string } & Omit<CarType, '_id'>) => ({
         ...car,
         _id: car._id || car.id // Use _id if present, otherwise use id
       }))
@@ -770,8 +770,8 @@ export default function CarsPage() {
                 </>
               ) : (
                 <div className="text-center py-12">
-                  <div className="text-gray-500 text-lg mb-4">{t("noCarsMatchingCriteria")}</div>
-                  <p className="text-gray-400">{t("changeFiltersOrContact")}</p>
+                  <div className="text-gray-500 text-lg mb-4">Няма автомобили, отговарящи на избраните критерии</div>
+                  <p className="text-gray-400">Моля, променете филтрите или се свържете с нас за повече опции</p>
                 </div>
               )}
             </div>
